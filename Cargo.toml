@@ -1,0 +1,15 @@
+[package]
+name = "trangarcom"
+version = "0.1.0"
+authors = ["Victor Koenders <victor.koenders@gmail.com>"]
+
+[dependencies]
+actix-web = "*"
+actix = "*"
+r2d2 = "*"
+diesel = { version = "*", features = ["postgres", "uuid", "chrono", "r2d2"] }
+uuid = "*"
+time = "*"
+dotenv = "*"
+chrono = "*"
+

@@ -3,7 +3,9 @@ extern crate actix;
 extern crate chrono;
 extern crate time;
 extern crate trangarcom;
+extern crate failure;
 extern crate uuid;
+extern crate futures;
 
 mod logger;
 mod state;
@@ -17,9 +19,9 @@ fn index(_req: HttpRequest<AppState>) -> Result<NamedFile> {
     NamedFile::open("static/index.html").map_err(Into::into)
 }
 
-fn main() {
+fn main() -> Result<(), failure::Error> {
     let sys = actix::System::new("trangarcom");
-    let state_provider = StateProvider::new();
+    let state_provider = StateProvider::new()?;
     server::new(move || {
         let logger = Logger::default();
         App::with_state(state_provider.create_state())
@@ -32,5 +34,6 @@ fn main() {
         .expect("Can not bind to port 8000")
         .start();
 
-    let _ = sys.run();
+    sys.run();
+    Ok(())
 }

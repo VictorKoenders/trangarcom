@@ -1,6 +1,6 @@
 use chrono::NaiveDateTime;
-use diesel::result::Error;
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+use failure::Error;
 use schema::request;
 use uuid::Uuid;
 
@@ -22,6 +22,7 @@ impl Request {
             .values(self)
             .returning(request::dsl::id)
             .get_result(&conn)
+            .map_err(Into::into)
     }
 
     pub fn set_response_time(time: f64, id: &Uuid, db: &DbConnection) -> Result<(), Error> {

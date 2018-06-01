@@ -4,6 +4,7 @@ extern crate r2d2;
 extern crate chrono;
 extern crate dotenv;
 extern crate uuid;
+extern crate failure;
 
 pub mod models;
 mod schema;

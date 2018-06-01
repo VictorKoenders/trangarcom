@@ -1,10 +1,10 @@
 #[macro_use]
 extern crate diesel;
-extern crate r2d2;
 extern crate chrono;
 extern crate dotenv;
-extern crate uuid;
 extern crate failure;
+extern crate r2d2;
+extern crate uuid;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde;
@@ -13,10 +13,10 @@ pub mod models;
 mod schema;
 
 use diesel::pg::PgConnection;
-use dotenv::dotenv;
-use std::env;
-use r2d2::{Pool, Error};
 use diesel::r2d2::ConnectionManager;
+use dotenv::dotenv;
+use r2d2::{Error, Pool};
+use std::env;
 
 #[derive(Clone)]
 pub struct DbConnection {
@@ -28,8 +28,6 @@ pub fn establish_connection() -> Result<DbConnection, Error> {
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     Ok(DbConnection {
-        conn: Pool::new(
-            ConnectionManager::new(database_url)
-        )?
+        conn: Pool::new(ConnectionManager::new(database_url))?,
     })
 }

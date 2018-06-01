@@ -60,8 +60,6 @@ fn blog_detail(req: HttpRequest<AppState>) -> HttpResponse {
     )
 }
 
-
-
 fn main() -> Result<(), failure::Error> {
     let sys = actix::System::new("trangarcom");
     let state_provider = StateProvider::new()?;

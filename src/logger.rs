@@ -93,10 +93,8 @@ impl Middleware<AppState> for Logger {
                 &request.state().db,
             ) {
                 use futures::Future;
-                type FutureType = Box<
-                    Future<Error = ::actix_web::error::Error, Item = ()>
-                    + 'static
-                >;
+                type FutureType =
+                    Box<Future<Error = ::actix_web::error::Error, Item = ()> + 'static>;
                 let future: FutureType = Box::new(future::err(e).map_err(Into::into));
                 return Finished::Future(future);
             }

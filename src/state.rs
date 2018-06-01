@@ -1,6 +1,6 @@
-use trangarcom::DbConnection;
 use failure::Error;
-use handlebars::{Handlebars, Renderable, RenderContext, Helper, HelperResult};
+use handlebars::{Handlebars, Helper, HelperResult, RenderContext, Renderable};
+use trangarcom::DbConnection;
 
 pub struct AppState {
     pub db: DbConnection,
@@ -12,27 +12,16 @@ pub struct StateProvider {
 }
 
 macro_rules! load {
-    ($hbs:expr, template $file:tt) => {
-        $hbs.register_template_string(
-            stringify!($file),
-            include_str!(
-                load!(url $file)
-            )
-        ).expect(concat!(
-            "Could not load template ",
-            load!(url $file)
-        ));
+    ($hbs:expr,template $file:tt) => {
+        $hbs.register_template_string(stringify!($file), include_str!(load!(url $file)))
+            .expect(concat!("Could not load template ", load!(url $file)));
     };
-    ($hbs:expr, partial $file:tt) => {
-        $hbs.register_partial(
-            stringify!($file),
-            include_str!(
+    ($hbs:expr,partial $file:tt) => {
+        $hbs.register_partial(stringify!($file), include_str!(load!(url $file)))
+            .expect(concat!(
+                "Could not load partial template ",
                 load!(url $file)
-            )
-        ).expect(concat!(
-            "Could not load partial template ",
-            load!(url $file)
-        ));
+            ));
     };
     (url $file:tt) => {
         concat!(
@@ -47,9 +36,7 @@ macro_rules! load {
 impl StateProvider {
     pub fn new() -> Result<StateProvider, Error> {
         let db = ::trangarcom::establish_connection()?;
-        Ok(StateProvider {
-            db,
-        })
+        Ok(StateProvider { db })
     }
 
     pub fn create_state(&self) -> AppState {
@@ -68,7 +55,7 @@ impl StateProvider {
     }
 }
 
-fn handlebars_equals (h: &Helper, hbs: &Handlebars, rc: &mut RenderContext) -> HelperResult {
+fn handlebars_equals(h: &Helper, hbs: &Handlebars, rc: &mut RenderContext) -> HelperResult {
     let first = h.param(0).unwrap();
     let second = h.param(1).unwrap();
 

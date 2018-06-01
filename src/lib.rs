@@ -5,6 +5,9 @@ extern crate chrono;
 extern crate dotenv;
 extern crate uuid;
 extern crate failure;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde;
 
 pub mod models;
 mod schema;

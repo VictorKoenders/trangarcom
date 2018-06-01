@@ -1,6 +1,6 @@
 use trangarcom::DbConnection;
 use failure::Error;
-use handlebars::Handlebars;
+use handlebars::{Handlebars, Renderable, RenderContext, Helper, HelperResult};
 
 pub struct AppState {
     pub db: DbConnection,
@@ -55,12 +55,26 @@ impl StateProvider {
     pub fn create_state(&self) -> AppState {
         let mut hbs = Handlebars::new();
         hbs.set_strict_mode(true);
+        hbs.register_helper("equals", Box::new(handlebars_equals));
 
         load!(hbs, template index);
+        load!(hbs, template blog);
+        load!(hbs, template blog_detail);
         load!(hbs, partial layout);
         AppState {
             db: self.db.clone(),
             hbs,
         }
+    }
+}
+
+fn handlebars_equals (h: &Helper, hbs: &Handlebars, rc: &mut RenderContext) -> HelperResult {
+    let first = h.param(0).unwrap();
+    let second = h.param(1).unwrap();
+
+    if first.value() == second.value() {
+        h.template().unwrap().render(hbs, rc)
+    } else {
+        Ok(())
     }
 }

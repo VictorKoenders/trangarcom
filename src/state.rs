@@ -43,6 +43,7 @@ impl StateProvider {
         let mut hbs = Handlebars::new();
         hbs.set_strict_mode(true);
         hbs.register_helper("equals", Box::new(handlebars_equals));
+        hbs.register_helper("markdown", Box::new(handlebars_markdown));
 
         load!(hbs, template index);
         load!(hbs, template blog);
@@ -64,4 +65,17 @@ fn handlebars_equals(h: &Helper, hbs: &Handlebars, rc: &mut RenderContext) -> He
     } else {
         Ok(())
     }
+}
+
+fn handlebars_markdown(h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> HelperResult {
+    use pulldown_cmark::{html, Parser};
+
+    let value = h.param(0).unwrap().value().as_str().unwrap();
+    let value = value.replace(">", "&gt;").replace("<", "&lt;");
+    let parser = Parser::new(&value);
+
+    let mut html_buf = String::new();
+    html::push_html(&mut html_buf, parser);
+    rc.writer.write(html_buf.as_bytes()).unwrap();
+    Ok(())
 }

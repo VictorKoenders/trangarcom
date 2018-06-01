@@ -7,6 +7,7 @@ extern crate handlebars;
 extern crate time;
 extern crate trangarcom;
 extern crate uuid;
+extern crate pulldown_cmark;
 
 mod logger;
 mod state;
@@ -46,7 +47,7 @@ fn blog_list(req: HttpRequest<AppState>) -> HttpResponse {
 fn blog_detail(req: HttpRequest<AppState>) -> HttpResponse {
     let item = trangarcom::models::BlogItem {
         title: String::from("Running a neural network on a micro controller"),
-        content: String::from("Content goes here"),
+        content: String::from("Content goes here\n\n# Test\n\n<script>alert('Hi');</script>"),
         next_post_seo_name: None,
         next_post_title: None,
         previous_post_seo_name: None,

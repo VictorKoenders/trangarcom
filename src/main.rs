@@ -6,17 +6,23 @@ extern crate trangarcom;
 extern crate failure;
 extern crate uuid;
 extern crate futures;
+extern crate handlebars;
+#[macro_use]
+extern crate serde_json;
 
 mod logger;
 mod state;
 
-use actix_web::{server, App, HttpRequest, Result};
-use actix_web::fs::NamedFile;
+use actix_web::{server, App, HttpRequest, HttpResponse};
 use state::{AppState, StateProvider};
 use logger::Logger;
 
-fn index(_req: HttpRequest<AppState>) -> Result<NamedFile> {
-    NamedFile::open("static/index.html").map_err(Into::into)
+fn index(req: HttpRequest<AppState>) -> HttpResponse {
+    HttpResponse::Ok()
+        .content_type("text/html")
+        .body(
+            req.state().hbs.render("index", &()).expect("Could not render template \"index\"")
+        )
 }
 
 fn main() -> Result<(), failure::Error> {

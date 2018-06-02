@@ -1,0 +1,16 @@
+{{#> layout title=title current="blog"}}
+    {{#if previous_post_seo_name}}
+        <a href="/blog/{{previous_post_seo_name}}">{{previous_post_title}}</a>
+    {{/if}}
+    {{#if next_post_seo_name}}
+        <a href="/blog/{{next_post_seo_name}}">{{next_post_title}}</a>
+    {{/if}}
+    <h1>{{title}}</h1>
+    {{#if tweet_id}}
+        <p>Please leave your comments on <a href="https://twitter.com/victorkoenders/status/{{tweet_id}}" target="_blank">Twitter</a></p>
+    {{/if}}
+    {{markdown content}}
+    {{#if tweet_id}}
+        <p>Please leave your comments on <a href="https://twitter.com/victorkoenders/status/{{tweet_id}}" target="_blank">Twitter</a></p>
+    {{/if}}
+{{/layout}}

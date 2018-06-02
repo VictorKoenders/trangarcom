@@ -1,6 +1,6 @@
 use chrono::NaiveDate;
+use diesel::sql_types::{Nullable, Text};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
-use diesel::sql_types::{Text, Nullable};
 use failure::Error;
 use schema::blogpost;
 
@@ -15,13 +15,22 @@ pub struct BlogListItem {
 }
 
 impl BlogListItem {
-    pub fn load_blog_posts(db: &DbConnection, limit: i64, offset: i64) -> Result<Vec<BlogListItem>, Error> {
+    pub fn load_blog_posts(
+        db: &DbConnection,
+        limit: i64,
+        offset: i64,
+    ) -> Result<Vec<BlogListItem>, Error> {
         let conn = db.conn.get()?;
         blogpost::table
             .filter(blogpost::dsl::published.eq(true))
             .limit(limit)
             .offset(offset)
-            .select((blogpost::dsl::seo_name, blogpost::dsl::title, blogpost::dsl::date, blogpost::dsl::summary))
+            .select((
+                blogpost::dsl::seo_name,
+                blogpost::dsl::title,
+                blogpost::dsl::date,
+                blogpost::dsl::summary,
+            ))
             .get_results(&conn)
             .map_err(Into::into)
     }
@@ -42,6 +51,8 @@ pub struct BlogItem {
     pub title: String,
     #[sql_type = "Text"]
     pub content: String,
+    #[sql_type = "Nullable<Text>"]
+    pub tweet_id: Option<String>,
 }
 
 impl BlogItem {
@@ -54,7 +65,8 @@ SELECT
 	next.seo_name AS next_post_seo_name,
 	next.title AS next_post_title,
 	blogpost.title,
-	blogpost.content
+	blogpost.content,
+	blogpost.tweet_id
 FROM blogpost
 LEFT JOIN blogpost AS previous ON previous.ID = (
 	SELECT ID FROM blogpost AS previous WHERE previous.published = true AND previous.date < blogpost.date ORDER BY previous.date DESC LIMIT 1
@@ -70,7 +82,7 @@ WHERE blogpost.seo_name = $1
         match result {
             Ok(v) => Ok(Some(v)),
             Err(::diesel::result::Error::NotFound) => Ok(None),
-            Err(e) => Err(e.into())
+            Err(e) => Err(e.into()),
         }
     }
 }

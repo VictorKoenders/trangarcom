@@ -1,0 +1,253 @@
+{{#>layout title="Resume" current="resume"}}
+<style>
+	.resume_container {
+		display: flex;
+	}
+
+	.left {
+		width: 35%;
+		background-color: #1F497D;
+	}
+
+	.left,
+	.left table {
+		color: white;
+	}
+
+	table {
+		border-spacing: 10px 20px;
+	}
+
+	.right {
+		width: 70%;
+	}
+
+	.left,
+	.right {
+		padding-top: 2em;
+		padding-bottom: 2em;
+	}
+
+	.left>h1 {
+		margin-left: 0.5em;
+	}
+
+	.left>h3 {
+		margin-left: 2em;
+	}
+
+	.left>table,
+	.left>p {
+		margin-left: 1em;
+	}
+
+	.right>p {
+		margin-left: 2em;
+		margin-right: 2em;
+	}
+	.left>h2,
+	.right>h2 {
+		margin-left: 0.5em;
+	}
+
+	.text_table tr td {
+		vertical-align: top;
+		padding-right: 1em;
+	}
+
+	.resume_container p {
+		margin-bottom: 1em;
+	}
+
+	.resume_container p.pull-right {
+		float: right;
+	}
+
+	.vertical-cell {
+		position: relative;
+		text-align: center;
+		width: 120px;
+	}
+
+	.vertical-cell .middle {
+		position: absolute;
+		top: 25px;
+		bottom: 25px;
+		left: 50%;
+		border-left: 1px solid gray;
+	}
+
+	.vertical-cell .end {
+		position: absolute;
+		bottom: 0;
+		width: 100%;
+		text-align: center;
+	}
+
+	.resume_container .left a {
+		color: white;
+		text-decoration: underline;
+	}
+
+	.resume_container .left a:hover {
+		color: #999;
+	}
+</style>
+<div class="resume_container">
+	<div class="left">
+		<h1>Victor Koenders</h1>
+		<h3>Software Developer</h3>
+		<br />
+		<br />
+		<br />
+		<h2>Personal Info</h2>
+		<table>
+			<tr>
+				<td>
+					<img src="images/icon_github.png" alt="Github" />
+				</td>
+				<td>
+					<a href="https://github.com/victorkoenders" target="_blank">/victorkoenders</a><br />
+					<a href="https://github.com/trangar" target="_blank">/trangar</a><br />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<img src="images/icon_linkedin.png" alt="Linkedin" />
+				</td>
+				<td><a href="https://linkedin.com/in/victorkoenders" target="_blank">/in/victorkoenders</a></td>
+			</tr>
+		</table>
+
+		<br />
+		<br />
+		<br />
+
+		<h2>Skills</h2>
+		<table class="text_table">
+			<tr>
+				<td>C#</td>
+				<td>
+					ASP.NET MVC
+					<br /> ASP.NET Core
+					<br /> DevExpress
+				</td>
+			</tr>
+			<tr>
+				<td>
+					JavaScript
+					<br /> TypeScript
+				</td>
+				<td>
+					React
+					<br /> jQuery
+					<br /> jQuery UI
+				</td>
+			</tr>
+			<tr>
+				<td>Rust</td>
+				<td>
+					Rocket.rs
+					<br /> Diesel
+					<br /> Firmware&nbsp;(stm32f103)
+				</td>
+			</tr>
+			<tr>
+				<td>C/C++
+				</td>
+				<td>
+					Firmware&nbsp;(atxmega256A3)
+					<br /> Qt + QML
+				</td>
+			</tr>
+			<tr>
+				<td>Tools</td>
+				<td>
+					Jenkins
+					<br /> Git
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div class="right">
+		<p>
+			Passionate professional software developer with strong communication skills and the ability to learn quickly. Able to communicate
+			requirements with both technical and non-technical stakeholders. Committed to high-quality, reusable code and user experiences
+			that will stand the test of time. Experienced with many different types of products, including embedded firmware, web
+			applications, desktop applications and phone apps.
+		</p>
+		<p>
+			Currently located in the Netherlands and interested in moving to Seattle permanently.
+		</p>
+		<h2>Experience</h2>
+		<table class="text_table">
+			<tr>
+				<td class="vertical-cell">
+					<p class="start">May&nbsp;2018</p>
+					<p class="middle"></p>
+					<p class="end">April&nbsp;2015</p>
+				</td>
+				<td>
+					<p class="pull-right">Maasdijk, Netherlands</p>
+					<h3>HortiMaX</h3>
+					<p>
+						Wide range of projects with the primary goal of supporting customer requests and expanding our product line. Projects included
+						iOS apps, C firmware, communicating with foreign interfaces (web APIs, CSV, Serial) and a central C# server to tie
+						it all together. Also introduced, advised and configured automated builds with the help of Jenkins.
+					</p>
+					<p><a href="http://www.hortimax.com/" target="_blank">www.hortimax.com</a></p>
+				</td>
+			</tr>
+			<tr>
+				<td class="vertical-cell">
+					<p class="start">February&nbsp;2015</p>
+					<p class="middle"></p>
+					<p class="end">February&nbsp;2014</p>
+				</td>
+				<td>
+					<p class="pull-right">Pijnacker, Netherlands</p>
+					<h3>YourSoft</h3>
+					<p>
+						Development on a product designed to support health companies and governmental instances. Responsible for the design and
+						development of several internal tools, including an SQL query builder for consultants.
+					</p>
+					<p><a href="http://www.yoursoft.nl/" target="_blank">www.yoursoft.nl</a></p>
+				</td>
+			</tr>
+			<tr>
+				<td class="vertical-cell">
+					<p class="start">December&nbsp;2013</p>
+					<p class="middle"></p>
+					<p class="end">August&nbsp;2011</p>
+				</td>
+				<td>
+					<p class="pull-right">Zeist, Netherlands</p>
+					<h3>Iddiz</h3>
+					<p>
+						Internship with the intent of making an in-house tool that generates code to simplify the development cycle. Also worked
+						on customer-facing software for a local bank, which included PDF generation and creating connectors for foreign APIs.
+					</p>
+					<p><a href="http://www.iddiz.com/" target="_blank">www.iddiz.com</a></p>
+				</td>
+			</tr>
+		</table>
+		<h2>Education</h2>
+		<table class="text_table">
+			<tr>
+				<td class="vertical-cell">
+					<p class="start">June&nbsp;2014</p>
+					<p class="middle"></p>
+					<p class="end">September&nbsp;2009</p>
+				</td>
+				<td>
+					<p class="pull-right">Hogeschool Utrecht, Utrecht, Netherlands</p>
+					<h3>Computer Science</h3>
+					<p>
+						Main courses included Java programming, Project management, Software patterns and designs, and Databases
+					</p>
+				</td>
+			</tr>
+		</table>
+	</div>
+</div>
+{{/layout}}

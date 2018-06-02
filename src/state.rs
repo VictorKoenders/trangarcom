@@ -26,7 +26,7 @@ macro_rules! load {
     (url $file:tt) => {
         concat!(
             env!("CARGO_MANIFEST_DIR"),
-            "/static/",
+            "/templates/",
             stringify!($file),
             ".hbs"
         )
@@ -48,6 +48,7 @@ impl StateProvider {
         load!(hbs, template index);
         load!(hbs, template blog);
         load!(hbs, template blog_detail);
+        load!(hbs, template resume);
         load!(hbs, partial layout);
         AppState {
             db: self.db.clone(),

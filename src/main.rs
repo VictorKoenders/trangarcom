@@ -1,13 +1,14 @@
 extern crate actix;
 extern crate actix_web;
 extern crate chrono;
+extern crate dotenv;
 extern crate failure;
 extern crate futures;
 extern crate handlebars;
+extern crate pulldown_cmark;
 extern crate time;
 extern crate trangarcom;
 extern crate uuid;
-extern crate pulldown_cmark;
 
 mod logger;
 mod state;
@@ -42,28 +43,39 @@ fn blog_list(req: HttpRequest<AppState>) -> HttpResponse {
 fn blog_detail(req: HttpRequest<AppState>) -> HttpResponse {
     let name = match req.match_info().get("seo_name") {
         Some(name) => name,
-        None => return HttpResponse::MovedPermanently()
-                        .header("Location", "/blog")
-                        .finish()
-    };
-    match trangarcom::models::BlogItem::load(&req.state().db, &name).expect("Could not load blog item") {
-        Some(item) => {
-            HttpResponse::Ok().content_type("text/html").body(
-                req.state()
-                    .hbs
-                    .render("blog_detail", &item)
-                    .expect("Could not render template \"blog_detail\""),
-            )
-        }
         None => {
-            HttpResponse::MovedPermanently()
-            .header("Location", "/blog")
-            .finish()
+            return HttpResponse::MovedPermanently()
+                .header("Location", "/blog")
+                .finish()
         }
+    };
+    match trangarcom::models::BlogItem::load(&req.state().db, &name)
+        .expect("Could not load blog item")
+    {
+        Some(item) => HttpResponse::Ok().content_type("text/html").body(
+            req.state()
+                .hbs
+                .render("blog_detail", &item)
+                .expect("Could not render template \"blog_detail\""),
+        ),
+        None => HttpResponse::MovedPermanently()
+            .header("Location", "/blog")
+            .finish(),
     }
 }
 
+fn resume(req: HttpRequest<AppState>) -> HttpResponse {
+    HttpResponse::Ok().content_type("text/html").body(
+        req.state()
+            .hbs
+            .render("resume", &())
+            .expect("Could not render template \"resume\""),
+    )
+}
+
 fn main() -> Result<(), failure::Error> {
+    dotenv::dotenv()?;
+
     let sys = actix::System::new("trangarcom");
     let state_provider = StateProvider::new()?;
     server::new(move || {
@@ -73,8 +85,8 @@ fn main() -> Result<(), failure::Error> {
             .resource("/", |r| r.f(index))
             .resource("/blog/{seo_name}", |r| r.f(blog_detail))
             .resource("/blog", |r| r.f(blog_list))
-        // .resource("/", |r| r.f(greet))
-        // .resource("/{name}", |r| r.f(greet))
+            .resource("/resume", |r| r.f(resume))
+            .handler("/images", actix_web::fs::StaticFiles::new("images"))
     }).bind("0.0.0.0:8000")
         .expect("Can not bind to port 8000")
         .start();

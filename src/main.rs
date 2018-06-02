@@ -27,16 +27,11 @@ fn index(req: HttpRequest<AppState>) -> HttpResponse {
 }
 
 fn blog_list(req: HttpRequest<AppState>) -> HttpResponse {
-    let list = vec![
-        trangarcom::models::BlogListItem {
-            seo_name: String::from("neural_network_on_micro_controller"),
-            title: String::from("Running a neural network on a micro controller"),
-            date: String::from("May 23, 2018"),
-            summary: String::from("I've been playing around with the idea of running a neural network on a micro controller")
-        }
-    ];
+    let items = trangarcom::models::BlogListItem::load_blog_posts(&req.state().db, 10, 0).unwrap();
+
     let mut data = BTreeMap::new();
-    data.insert("blog_items".to_string(), list);
+    data.insert("blog_items".to_string(), items);
+
     HttpResponse::Ok().content_type("text/html").body(
         req.state()
             .hbs
@@ -45,20 +40,27 @@ fn blog_list(req: HttpRequest<AppState>) -> HttpResponse {
     )
 }
 fn blog_detail(req: HttpRequest<AppState>) -> HttpResponse {
-    let item = trangarcom::models::BlogItem {
-        title: String::from("Running a neural network on a micro controller"),
-        content: String::from("Content goes here\n\n# Test\n\n<script>alert('Hi');</script>"),
-        next_post_seo_name: None,
-        next_post_title: None,
-        previous_post_seo_name: None,
-        previous_post_title: None,
+    let name = match req.match_info().get("seo_name") {
+        Some(name) => name,
+        None => return HttpResponse::MovedPermanently()
+                        .header("Location", "/blog")
+                        .finish()
     };
-    HttpResponse::Ok().content_type("text/html").body(
-        req.state()
-            .hbs
-            .render("blog_detail", &item)
-            .expect("Could not render template \"blog_detail\""),
-    )
+    match trangarcom::models::BlogItem::load(&req.state().db, &name).expect("Could not load blog item") {
+        Some(item) => {
+            HttpResponse::Ok().content_type("text/html").body(
+                req.state()
+                    .hbs
+                    .render("blog_detail", &item)
+                    .expect("Could not render template \"blog_detail\""),
+            )
+        }
+        None => {
+            HttpResponse::MovedPermanently()
+            .header("Location", "/blog")
+            .finish()
+        }
+    }
 }
 
 fn main() -> Result<(), failure::Error> {

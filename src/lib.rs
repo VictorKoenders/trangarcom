@@ -1,3 +1,5 @@
+#![recursion_limit = "1024"]
+
 #[macro_use]
 extern crate diesel;
 extern crate chrono;
@@ -10,7 +12,7 @@ extern crate serde_derive;
 extern crate serde;
 
 pub mod models;
-mod schema;
+pub mod schema;
 
 use diesel::pg::PgConnection;
 use diesel::r2d2::ConnectionManager;

@@ -31,12 +31,18 @@ pub struct PrivacySettings {
 pub struct IndexValues {
     pub load_twitter: bool,
     pub anonymize_logging: bool,
+    pub remote_addr: String,
+    pub headers: String,
+    pub url: String,
 }
 
-fn index(req: HttpRequest<AppState>) -> HttpResponse {
+fn index(mut req: HttpRequest<AppState>) -> HttpResponse {
     let values = IndexValues {
         load_twitter: req.cookie("twitter_visible").is_some(),
         anonymize_logging: req.cookie("anonymize_logging").is_some(),
+        remote_addr: req.peer_addr().map(|a| a.to_string()).unwrap_or_else(||String::new()),
+        headers: format!("{:?}", req.headers_mut()),
+        url: req.uri().to_string(),
     };
     HttpResponse::Ok().content_type("text/html").body(
         req.state()

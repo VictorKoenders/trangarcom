@@ -9,22 +9,70 @@ extern crate pulldown_cmark;
 extern crate time;
 extern crate trangarcom;
 extern crate uuid;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde;
 
 mod logger;
 mod state;
 
-use actix_web::{server, App, HttpRequest, HttpResponse};
+use actix_web::{http, server, App, Form, HttpRequest, HttpResponse};
 use logger::Logger;
 use state::{AppState, StateProvider};
 use std::collections::BTreeMap;
 
+#[derive(Deserialize, Debug)]
+pub struct PrivacySettings {
+    pub load_twitter: Option<u8>,
+    pub anonymize_logging: Option<u8>,
+}
+
+#[derive(Serialize)]
+pub struct IndexValues {
+    pub load_twitter: bool,
+    pub anonymize_logging: bool,
+}
+
 fn index(req: HttpRequest<AppState>) -> HttpResponse {
+    let values = IndexValues {
+        load_twitter: req.cookie("twitter_visible").is_some(),
+        anonymize_logging: req.cookie("anonymize_logging").is_some(),
+    };
     HttpResponse::Ok().content_type("text/html").body(
         req.state()
             .hbs
-            .render("index", &())
+            .render("index", &values)
             .expect("Could not render template \"index\""),
     )
+}
+
+fn index_post((form, req): (Form<PrivacySettings>, HttpRequest<AppState>)) -> HttpResponse {
+    let mut response = HttpResponse::Found();
+    response.header("location", "/");
+    let cookie = req.cookie("twitter_visible");
+    match (cookie, form.load_twitter) {
+        (Some(ref c), None) => {
+            response.del_cookie(c);
+        }
+        (None, Some(n)) if n > 0 => {
+            response.cookie(http::Cookie::build("twitter_visible", "1").finish());
+        }
+        _ => {}
+    }
+    let cookie = req.cookie("anonymize_logging");
+    match (cookie, form.anonymize_logging) {
+        (Some(ref c), None) => {
+            response.del_cookie(c);
+        }
+        (None, Some(n)) if n > 0 => {
+            response.cookie(http::Cookie::build("anonymize_logging", "1").finish());
+            if let Some(addr) = req.peer_addr() {
+                ::trangarcom::models::Request::remove_requests(&req.state().db, &addr.ip().to_string()).unwrap();
+            }
+        }
+        _ => {}
+    }
+    response.finish()
 }
 
 fn blog_list(req: HttpRequest<AppState>) -> HttpResponse {
@@ -82,7 +130,10 @@ fn main() -> Result<(), failure::Error> {
         let logger = Logger::default();
         App::with_state(state_provider.create_state())
             .middleware(logger)
-            .resource("/", |r| r.f(index))
+            .resource("/", |r| {
+                r.get().f(index);
+                r.post().with(index_post);
+            })
             .resource("/blog/{seo_name}", |r| r.f(blog_detail))
             .resource("/blog", |r| r.f(blog_list))
             .resource("/resume", |r| r.f(resume))

@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, TextExpressionMethods};
 use failure::Error;
 use schema::request;
 use uuid::Uuid;
@@ -38,6 +38,14 @@ impl Request {
         ::diesel::update(request::table.find(id))
             .set(request::dsl::finish_time.eq(time))
             .execute(&conn)?;
+        Ok(())
+    }
+
+    pub fn remove_requests(db: &DbConnection, addr: &str) -> Result<(), Error> {
+        let conn = db.conn.get()?;
+        ::diesel::delete(
+            request::table.filter(request::dsl::remote_ip.like(format!("{}:%", addr))),
+        ).execute(&conn)?;
         Ok(())
     }
 }

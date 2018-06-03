@@ -1,11 +1,66 @@
 {{#> layout title="" current="home"}}
+
+{{#if load_twitter}}
+<div class="row">
+    <div class="col-md-8">
+        {{/if}}
+
 <h1>Welcome</h1>
 <p>
     I am a developer from the Netherlands who likes Rust, C# and Typescript. For more info you can check out my
     <a href="/resume">resume</a> or
     <a href="https://github.com/victorkoenders" target="_blank">Github</a>
 </p>
-<p>
-    Mind the mess, this website is still under development.
-</p>
+<form method="POST" action="/">
+    <div class="row">
+        <div class="col-md-8">
+            <p>
+                This website does not use cookies. However, it is possible to enable my
+                <a href="https://twitter.com/victorkoenders/"
+                    target="_blank">Twitter feed</a>.<br />
+                Because twitter uses (3rd party) cookies, viewing the twitter feed is opt-in. Please check this box to show the twitter feed.
+            </p>
+        </div>
+        <div class="col-md-4">
+            <p>Show the twitter feed:</p>
+            <input type="checkbox" {{#if load_twitter}} checked="checked" {{/if}} name="load_twitter" value="1" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <p>
+                In addition to twitter, this website does track your following information:
+            </p>
+            <ul>
+                <li>IP Address</li>
+                <li>Browser headers</li>
+            </ul>
+            <p>
+                The reason I track this information is because we like seeing what requests are being done to the website, mostly to see what fun exploits bots are trying to pull on my website.
+            </p>
+            <p>
+                You can opt-out of this by checking this checkbox.
+                In addition, this will remove all logging data from your IP address.
+                This will set a cookie on your browser!
+            </p>
+        </div>
+        <div class="col-md-4">
+            <p>Anonymize logging:</p>
+            <input type="checkbox" {{#if anonymize_logging}} checked="checked" {{/if}} name="anonymize_logging" value="1" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="offset-8 col-md-4">
+            <button type="submit" class="btn btn-primary">Save settings</button>
+        </div>
+    </div>
+</form>
+{{#if load_twitter}}
+    </div>
+    <div class="col-md-4">
+        <a class="twitter-timeline" href="https://twitter.com/victorkoenders?ref_src=twsrc%5Etfw">Tweets by @victorkoenders</a>
+        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+</div>
+{{/if}}
 {{/layout}}

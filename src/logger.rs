@@ -47,6 +47,10 @@ impl ResponseError for NoRemoteAddrError {
 
 impl Middleware<AppState> for Logger {
     fn start(&self, req: &mut HttpRequest<AppState>) -> Result<Started> {
+        if req.cookie("anonymize_logging").is_some() {
+            return Ok(Started::Done);
+        }
+
         let ip = match req.peer_addr() {
             Some(a) => a.to_string(),
             None => {

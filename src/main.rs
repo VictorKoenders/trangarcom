@@ -16,10 +16,27 @@ extern crate serde;
 mod logger;
 mod state;
 
-use actix_web::{http, server, App, Form, HttpRequest, HttpResponse};
+use actix_web::{http, server, App, Form, HttpRequest, HttpResponse, HttpMessage};
 use logger::Logger;
 use state::{AppState, StateProvider};
 use std::collections::BTreeMap;
+
+trait RequestIp {
+    fn get_ip(&self) -> String;
+}
+
+impl RequestIp for HttpRequest<AppState> {
+    fn get_ip(&self) -> String {
+        if let Some(ip) = self.headers().get("x-real-ip") {
+            if let Ok(s) = ip.to_str() {
+                return s.to_owned();
+            }
+        }
+        self.peer_addr()
+            .map(|a| a.ip().to_string())
+            .unwrap_or_else(String::new)
+    }
+}
 
 #[derive(Deserialize, Debug)]
 pub struct PrivacySettings {
@@ -36,12 +53,12 @@ pub struct IndexValues {
     pub url: String,
 }
 
-fn index(mut req: HttpRequest<AppState>) -> HttpResponse {
+fn index(req: HttpRequest<AppState>) -> HttpResponse {
     let values = IndexValues {
         load_twitter: req.cookie("twitter_visible").is_some(),
         anonymize_logging: req.cookie("anonymize_logging").is_some(),
-        remote_addr: req.peer_addr().map(|a| a.to_string()).unwrap_or_else(||String::new()),
-        headers: format!("{:?}", req.headers_mut()),
+        remote_addr: req.get_ip(),
+        headers: format!("{:?}", req.headers()),
         url: req.uri().to_string(),
     };
     HttpResponse::Ok().content_type("text/html").body(
@@ -72,9 +89,7 @@ fn index_post((form, req): (Form<PrivacySettings>, HttpRequest<AppState>)) -> Ht
         }
         (None, Some(n)) if n > 0 => {
             response.cookie(http::Cookie::build("anonymize_logging", "1").finish());
-            if let Some(addr) = req.peer_addr() {
-                ::trangarcom::models::Request::remove_requests(&req.state().db, &addr.ip().to_string()).unwrap();
-            }
+            ::trangarcom::models::Request::remove_requests(&req.state().db, &req.get_ip()).unwrap();
         }
         _ => {}
     }

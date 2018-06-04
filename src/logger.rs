@@ -1,6 +1,6 @@
-use actix_web::error::{ResponseError, Result};
+use actix_web::error::Result;
 use actix_web::middleware::{Finished, Middleware, Response, Started};
-use actix_web::{HttpRequest, HttpResponse};
+use actix_web::{HttpRequest, HttpResponse, HttpMessage};
 use chrono;
 use futures::future;
 use state::AppState;
@@ -17,51 +17,17 @@ struct LogData {
     start: f64,
 }
 
-pub struct NoRemoteAddrError;
-
-impl ::std::error::Error for NoRemoteAddrError {
-    fn description(&self) -> &'static str {
-        "No remote address set"
-    }
-}
-
-impl ::std::fmt::Display for NoRemoteAddrError {
-    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        use std::error::Error;
-        write!(fmt, "{}", self.description())
-    }
-}
-
-impl ::std::fmt::Debug for NoRemoteAddrError {
-    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        use std::error::Error;
-        write!(fmt, "{}", self.description())
-    }
-}
-
-impl ResponseError for NoRemoteAddrError {
-    fn error_response(&self) -> HttpResponse {
-        HttpResponse::BadRequest().finish()
-    }
-}
-
 impl Middleware<AppState> for Logger {
     fn start(&self, req: &mut HttpRequest<AppState>) -> Result<Started> {
         if req.cookie("anonymize_logging").is_some() {
             return Ok(Started::Done);
         }
-
-        let ip = match req.peer_addr() {
-            Some(a) => a.to_string(),
-            None => {
-                return Err(NoRemoteAddrError.into());
-            }
-        };
+        use RequestIp;
         let request = trangarcom::models::Request {
             time: chrono::Utc::now().naive_utc(),
             url: req.uri().to_string(),
-            remote_ip: ip,
-            headers: format!("{:?}", req.headers_mut()),
+            remote_ip: req.get_ip(),
+            headers: format!("{:?}", req.headers()),
         };
 
         let id = request.save(&req.state().db)?;

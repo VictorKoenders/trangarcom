@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, TextExpressionMethods};
+use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use failure::Error;
 use schema::request;
 use uuid::Uuid;
@@ -11,7 +11,6 @@ use DbConnection;
 pub struct Request {
     pub time: NaiveDateTime,
     pub url: String,
-    pub remote_ip: String,
     pub headers: String,
 }
 
@@ -25,10 +24,13 @@ impl Request {
             .map_err(Into::into)
     }
 
-    pub fn set_response_time(time: f64, id: &Uuid, db: &DbConnection) -> Result<(), Error> {
+    pub fn set_response(time: f64, status_code: i16, id: &Uuid, db: &DbConnection) -> Result<(), Error> {
         let conn = db.conn.get()?;
         ::diesel::update(request::table.find(id))
-            .set(request::dsl::response_time.eq(time))
+            .set((
+                request::dsl::response_time.eq(time),
+                request::dsl::status_code.eq(status_code),
+            ))
             .execute(&conn)?;
         Ok(())
     }
@@ -38,14 +40,6 @@ impl Request {
         ::diesel::update(request::table.find(id))
             .set(request::dsl::finish_time.eq(time))
             .execute(&conn)?;
-        Ok(())
-    }
-
-    pub fn remove_requests(db: &DbConnection, addr: &str) -> Result<(), Error> {
-        let conn = db.conn.get()?;
-        ::diesel::delete(
-            request::table.filter(request::dsl::remote_ip.like(format!("{}:%", addr))),
-        ).execute(&conn)?;
         Ok(())
     }
 }

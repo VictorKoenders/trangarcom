@@ -22,11 +22,10 @@ impl Middleware<AppState> for Logger {
         if req.cookie("anonymize_logging").is_some() {
             return Ok(Started::Done);
         }
-        use RequestIp;
+
         let request = trangarcom::models::Request {
             time: chrono::Utc::now().naive_utc(),
             url: req.uri().to_string(),
-            remote_ip: req.get_ip(),
             headers: format!("{:?}", req.headers()),
         };
 
@@ -46,8 +45,9 @@ impl Middleware<AppState> for Logger {
         resp: HttpResponse,
     ) -> Result<Response> {
         if let Some(data) = request.extensions().get::<LogData>() {
-            trangarcom::models::Request::set_response_time(
+            trangarcom::models::Request::set_response(
                 time::precise_time_s() - data.start,
+                resp.status().as_u16() as i16,
                 &data.id,
                 &request.state().db,
             )?;

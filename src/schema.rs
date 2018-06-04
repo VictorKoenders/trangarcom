@@ -16,11 +16,14 @@ table! {
         id -> Uuid,
         time -> Timestamp,
         url -> Text,
-        remote_ip -> Text,
         headers -> Text,
         response_time -> Nullable<Float8>,
         finish_time -> Nullable<Float8>,
+        status_code -> Nullable<Int2>,
     }
 }
 
-allow_tables_to_appear_in_same_query!(blogpost, request,);
+allow_tables_to_appear_in_same_query!(
+    blogpost,
+    request,
+);

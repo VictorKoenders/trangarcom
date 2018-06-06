@@ -1,9 +1,11 @@
 {{#> layout title=title current="blog"}}
     {{#if previous_post_seo_name}}
-        <a href="/blog/{{previous_post_seo_name}}">{{previous_post_title}}</a>
+        <a href="/blog/{{previous_post_seo_name}}" class="float-right">{{previous_post_title}} -&gt;</a>
     {{/if}}
     {{#if next_post_seo_name}}
-        <a href="/blog/{{next_post_seo_name}}">{{next_post_title}}</a>
+        <a href="/blog/{{next_post_seo_name}}">&lt- {{next_post_title}}</a>
+    {{else}}
+        <br />
     {{/if}}
     <h1>{{title}}</h1>
     {{#if tweet_id}}

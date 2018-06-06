@@ -1,6 +1,6 @@
 use actix_web::error::Result;
 use actix_web::middleware::{Finished, Middleware, Response, Started};
-use actix_web::{HttpRequest, HttpResponse, HttpMessage};
+use actix_web::{HttpMessage, HttpRequest, HttpResponse};
 use chrono;
 use futures::future;
 use state::AppState;

@@ -24,7 +24,12 @@ impl Request {
             .map_err(Into::into)
     }
 
-    pub fn set_response(time: f64, status_code: i16, id: &Uuid, db: &DbConnection) -> Result<(), Error> {
+    pub fn set_response(
+        time: f64,
+        status_code: i16,
+        id: &Uuid,
+        db: &DbConnection,
+    ) -> Result<(), Error> {
         let conn = db.conn.get()?;
         ::diesel::update(request::table.find(id))
             .set((

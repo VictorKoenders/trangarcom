@@ -16,7 +16,7 @@ extern crate serde;
 mod logger;
 mod state;
 
-use actix_web::{http, server, App, Form, HttpRequest, HttpResponse, HttpMessage};
+use actix_web::{http, server, App, Form, HttpMessage, HttpRequest, HttpResponse};
 use logger::Logger;
 use state::{AppState, StateProvider};
 use std::collections::BTreeMap;

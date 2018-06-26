@@ -1,14 +1,49 @@
 use failure::Error;
 use handlebars::{Handlebars, Helper, HelperResult, RenderContext, Renderable};
 use trangarcom::DbConnection;
+use prometheus::{IntCounterVec, Registry, Opts, Histogram, HistogramOpts};
 
+#[derive(Clone)]
+pub struct Prometheus {
+    pub request_timer: Histogram,
+    pub response: IntCounterVec,
+    pub response_size: Histogram,
+    pub registry: Registry,
+}
+
+impl Default for Prometheus {
+    fn default() -> Prometheus {
+        let request_timer_opts = HistogramOpts::new("requests_timer", "Request duration");
+        let request_timer = Histogram::with_opts(request_timer_opts).unwrap();
+
+        let response_opts = Opts::new("response", "Responses");
+        let response = IntCounterVec::new(response_opts, &["all"]).unwrap();
+
+        let response_size_opts = HistogramOpts::new("response_size", "Respones size (bytes)");
+        let response_size = Histogram::with_opts(response_size_opts).unwrap();
+
+        let registry = Registry::new();
+        registry.register(Box::new(request_timer.clone())).unwrap();
+        registry.register(Box::new(response.clone())).unwrap();
+        registry.register(Box::new(response_size.clone())).unwrap();
+
+        Prometheus {
+            request_timer,
+            response,
+            response_size,
+            registry,
+        }
+    }
+}
 pub struct AppState {
     pub db: DbConnection,
     pub hbs: Handlebars,
+    pub prometheus: Prometheus,
 }
 
 pub struct StateProvider {
     db: DbConnection,
+    prometheus: Prometheus,
 }
 
 macro_rules! load {
@@ -36,7 +71,7 @@ macro_rules! load {
 impl StateProvider {
     pub fn new() -> Result<StateProvider, Error> {
         let db = ::trangarcom::establish_connection()?;
-        Ok(StateProvider { db })
+        Ok(StateProvider { db, prometheus: Prometheus::default() })
     }
 
     pub fn create_state(&self) -> AppState {
@@ -53,6 +88,7 @@ impl StateProvider {
         AppState {
             db: self.db.clone(),
             hbs,
+            prometheus: self.prometheus.clone(),
         }
     }
 }

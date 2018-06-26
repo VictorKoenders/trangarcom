@@ -1,3 +1,5 @@
+#![feature(proc_macro, proc_macro_gen)]
+
 extern crate actix;
 extern crate actix_web;
 extern crate chrono;
@@ -12,6 +14,7 @@ extern crate uuid;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde;
+extern crate prometheus;
 
 mod logger;
 mod state;
@@ -122,6 +125,16 @@ fn resume(req: HttpRequest<AppState>) -> HttpResponse {
     )
 }
 
+fn get_prometheus(req: HttpRequest<AppState>) -> String {
+    use prometheus::{TextEncoder, Encoder};
+
+    let mut buffer = vec![];
+    let encoder = TextEncoder::new();
+    let metric_familys = req.state().prometheus.registry.gather();
+    encoder.encode(&metric_familys, &mut buffer).unwrap();
+    String::from_utf8(buffer).unwrap()
+}
+
 fn main() -> Result<(), failure::Error> {
     dotenv::dotenv()?;
 
@@ -135,6 +148,7 @@ fn main() -> Result<(), failure::Error> {
                 r.get().f(index);
                 r.post().with(index_post);
             })
+            .resource("/prometheus", |r| r.f(get_prometheus))
             .resource("/blog/{seo_name}", |r| r.f(blog_detail))
             .resource("/blog", |r| r.f(blog_list))
             .resource("/resume", |r| r.f(resume))

@@ -26,5 +26,10 @@ serde_json = "1.0.22"
 serde = "1.0.66" # dependant on serde_json's version
 serde_derive = "1.0.66" # dependant on serde_json's version
 
+[dependencies.prometheus]
+git = "https://github.com/pingcap/rust-prometheus.git"
+default-features = false
+features = ["nightly"]
+
 [replace]
 "cookie:0.10.1" = { path = "libs/cookie-rs" }

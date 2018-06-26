@@ -8,7 +8,8 @@
 
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
-    crossorigin="anonymous">
+    crossorigin="anonymous"> {{#equals current "resume"}}
+  <link href="./static/resume.css" rel="stylesheet"> {{/equals}}
 
   <title>Trangar.com{{#if title}} - {{title}}{{/if}}</title>
 </head>
@@ -23,13 +24,13 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item{{#equals current "home"}} active{{/equals}}">
+          <li class="nav-item{{#equals current " home "}} active{{/equals}}">
             <a class="nav-link" href="/">Home</a>
           </li>
-          <li class="nav-item{{#equals current "blog"}} active{{/equals}}">
+          <li class="nav-item{{#equals current " blog "}} active{{/equals}}">
             <a class="nav-link" href="/blog">Blog</a>
           </li>
-          <li class="nav-item{{#equals current "resume"}} active{{/equals}}">
+          <li class="nav-item{{#equals current " resume "}} active{{/equals}}">
             <a class="nav-link" href="/resume">Resume</a>
           </li>
         </ul>

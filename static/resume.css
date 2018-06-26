@@ -1,0 +1,123 @@
+
+.resume_container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.left {
+    width: 35%;
+    background-color: #1F497D;
+    min-height: 100vh;
+}
+
+.left,
+.left table {
+    color: white;
+}
+
+table {
+    border-spacing: 10px 20px;
+}
+
+.right {
+    width: 70%;
+}
+
+.left,
+.right {
+    padding-top: 2em;
+    padding-bottom: 2em;
+}
+
+.left>h1 {
+    margin-left: 0.5em;
+}
+
+.left>h3 {
+    margin-left: 2em;
+}
+
+.left>table,
+.left>p {
+    margin-left: 1em;
+}
+
+.right>p {
+    margin-left: 2em;
+    margin-right: 2em;
+}
+
+.left>h2,
+.right>h2 {
+    margin-left: 0.5em;
+}
+
+.text_table tr td {
+    vertical-align: top;
+}
+
+.resume_container p {
+    margin-bottom: 1em;
+}
+
+.resume_container p.pull-right {
+    float: right;
+}
+
+.vertical-cell {
+    position: relative;
+    text-align: center;
+    width: 140px;
+}
+
+.vertical-cell .start {
+    width: 140px;
+    text-align: center;
+}
+
+.vertical-cell .middle {
+    position: absolute;
+    top: 25px;
+    bottom: 25px;
+    left: 50%;
+    width: 1px;
+    background-color: gray;
+    /* border-left: 1px solid gray; */
+}
+
+.vertical-cell .end {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+}
+
+.resume_container .left a {
+    color: white;
+    text-decoration: underline;
+}
+
+.resume_container .left a:hover {
+    color: #999;
+}
+@media print {
+    .navbar {
+        display: none;
+    }
+    .container {
+        position:absolute;
+        top:0px;
+        left:0px;
+        bottom:0px;
+        right:0px;
+        margin: 0;
+        padding: 0;
+    }
+    @page {
+        size: auto;
+        margin: 0;
+    }
+    a {
+        text-decoration: none !important;
+    }
+}

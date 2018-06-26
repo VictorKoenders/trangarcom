@@ -23,4 +23,7 @@ table! {
     }
 }
 
-allow_tables_to_appear_in_same_query!(blogpost, request,);
+allow_tables_to_appear_in_same_query!(
+    blogpost,
+    request,
+);

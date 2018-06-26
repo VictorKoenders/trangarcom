@@ -139,6 +139,7 @@ fn main() -> Result<(), failure::Error> {
             .resource("/blog", |r| r.f(blog_list))
             .resource("/resume", |r| r.f(resume))
             .handler("/images", actix_web::fs::StaticFiles::new("images"))
+            .handler("/static", actix_web::fs::StaticFiles::new("static"))
     }).bind("0.0.0.0:8000")
         .expect("Can not bind to port 8000")
         .start();

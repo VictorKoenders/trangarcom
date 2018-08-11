@@ -1,4 +1,4 @@
-#![feature(proc_macro, proc_macro_gen)]
+#![feature(proc_macro_gen)]
 
 extern crate actix;
 extern crate actix_web;
@@ -13,8 +13,8 @@ extern crate trangarcom;
 extern crate uuid;
 #[macro_use]
 extern crate serde_derive;
-extern crate serde;
 extern crate prometheus;
+extern crate serde;
 
 mod logger;
 mod state;
@@ -38,7 +38,7 @@ pub struct IndexValues {
     pub url: String,
 }
 
-fn index(req: HttpRequest<AppState>) -> HttpResponse {
+fn index(req: &HttpRequest<AppState>) -> HttpResponse {
     let values = IndexValues {
         load_twitter: req.cookie("twitter_visible").is_some(),
         anonymize_logging: req.cookie("anonymize_logging").is_some(),
@@ -79,7 +79,7 @@ fn index_post((form, req): (Form<PrivacySettings>, HttpRequest<AppState>)) -> Ht
     response.finish()
 }
 
-fn blog_list(req: HttpRequest<AppState>) -> HttpResponse {
+fn blog_list(req: &HttpRequest<AppState>) -> HttpResponse {
     let items = trangarcom::models::BlogListItem::load_blog_posts(&req.state().db, 10, 0).unwrap();
 
     let mut data = BTreeMap::new();
@@ -92,7 +92,7 @@ fn blog_list(req: HttpRequest<AppState>) -> HttpResponse {
             .expect("Could not render template \"blog\""),
     )
 }
-fn blog_detail(req: HttpRequest<AppState>) -> HttpResponse {
+fn blog_detail(req: &HttpRequest<AppState>) -> HttpResponse {
     let name = match req.match_info().get("seo_name") {
         Some(name) => name,
         None => {
@@ -116,7 +116,7 @@ fn blog_detail(req: HttpRequest<AppState>) -> HttpResponse {
     }
 }
 
-fn resume(req: HttpRequest<AppState>) -> HttpResponse {
+fn resume(req: &HttpRequest<AppState>) -> HttpResponse {
     HttpResponse::Ok().content_type("text/html").body(
         req.state()
             .hbs
@@ -125,8 +125,8 @@ fn resume(req: HttpRequest<AppState>) -> HttpResponse {
     )
 }
 
-fn get_prometheus(req: HttpRequest<AppState>) -> String {
-    use prometheus::{TextEncoder, Encoder};
+fn get_prometheus(req: &HttpRequest<AppState>) -> String {
+    use prometheus::{Encoder, TextEncoder};
 
     let mut buffer = vec![];
     let encoder = TextEncoder::new();
@@ -147,16 +147,20 @@ fn main() -> Result<(), failure::Error> {
             .resource("/", |r| {
                 r.get().f(index);
                 r.post().with(index_post);
-            })
-            .resource("/prometheus", |r| r.f(get_prometheus))
+            }).resource("/prometheus", |r| r.f(get_prometheus))
             .resource("/blog/{seo_name}", |r| r.f(blog_detail))
             .resource("/blog", |r| r.f(blog_list))
             .resource("/resume", |r| r.f(resume))
-            .handler("/images", actix_web::fs::StaticFiles::new("images"))
-            .handler("/static", actix_web::fs::StaticFiles::new("static"))
+            .handler(
+                "/images",
+                actix_web::fs::StaticFiles::new("images").unwrap(),
+            ).handler(
+                "/static",
+                actix_web::fs::StaticFiles::new("static").unwrap(),
+            )
     }).bind("0.0.0.0:8000")
-        .expect("Can not bind to port 8000")
-        .start();
+    .expect("Can not bind to port 8000")
+    .start();
 
     sys.run();
     Ok(())

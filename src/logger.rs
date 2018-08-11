@@ -19,7 +19,7 @@ struct LogData {
 }
 
 impl Middleware<AppState> for Logger {
-    fn start(&self, req: &mut HttpRequest<AppState>) -> Result<Started> {
+    fn start(&self, req: &HttpRequest<AppState>) -> Result<Started> {
         if req.cookie("anonymize_logging").is_some() {
             return Ok(Started::Done);
         }
@@ -42,11 +42,7 @@ impl Middleware<AppState> for Logger {
         Ok(Started::Done)
     }
 
-    fn response(
-        &self,
-        request: &mut HttpRequest<AppState>,
-        resp: HttpResponse,
-    ) -> Result<Response> {
+    fn response(&self, request: &HttpRequest<AppState>, resp: HttpResponse) -> Result<Response> {
         if let Some(data) = request.extensions().get::<LogData>() {
             let status_code = resp.status().as_u16() as i16;
             trangarcom::models::Request::set_response(
@@ -71,7 +67,6 @@ impl Middleware<AppState> for Logger {
                 .inc();
         }
         if let Some(size) = get_response_length(&resp) {
-            println!("Response size: {}", size);
             request
                 .state()
                 .prometheus
@@ -81,7 +76,7 @@ impl Middleware<AppState> for Logger {
         Ok(Response::Done(resp))
     }
 
-    fn finish(&self, request: &mut HttpRequest<AppState>, _resp: &HttpResponse) -> Finished {
+    fn finish(&self, request: &HttpRequest<AppState>, _resp: &HttpResponse) -> Finished {
         if let Some(data) = request.extensions_mut().remove::<LogData>() {
             if let Err(e) = trangarcom::models::Request::set_finish_time(
                 time::precise_time_s() - data.start,
@@ -106,7 +101,7 @@ fn get_response_length(res: &HttpResponse) -> Option<usize> {
         Body::Binary(Binary::Bytes(b)) => Some(b.len()),
         Body::Binary(Binary::Slice(b)) => Some(b.len()),
         Body::Binary(Binary::SharedString(b)) => Some(b.len()),
-        Body::Binary(Binary::ArcSharedString(b)) => Some(b.len()),
+        // Body::Binary(Binary::ArcSharedString(b)) => Some(b.len()),
         Body::Binary(Binary::SharedVec(b)) => Some(b.len()),
         Body::Streaming(_) => None,
         Body::Actor(_) => None,

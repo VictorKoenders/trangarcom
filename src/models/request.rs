@@ -35,8 +35,7 @@ impl Request {
             .set((
                 request::dsl::response_time.eq(time),
                 request::dsl::status_code.eq(status_code),
-            ))
-            .execute(&conn)?;
+            )).execute(&conn)?;
         Ok(())
     }
 

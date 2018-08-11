@@ -30,8 +30,7 @@ impl BlogListItem {
                 blogpost::dsl::title,
                 blogpost::dsl::date,
                 blogpost::dsl::summary,
-            ))
-            .order(blogpost::dsl::date.desc())
+            )).order(blogpost::dsl::date.desc())
             .get_results(&conn)
             .map_err(Into::into)
     }

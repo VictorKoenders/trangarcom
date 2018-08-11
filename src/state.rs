@@ -1,7 +1,7 @@
 use failure::Error;
-use handlebars::{Handlebars, Helper, HelperResult, RenderContext, Renderable};
+use handlebars::{Context, Handlebars, Helper, HelperResult, Output, RenderContext, Renderable};
+use prometheus::{Histogram, HistogramOpts, IntCounterVec, Opts, Registry};
 use trangarcom::DbConnection;
-use prometheus::{IntCounterVec, Registry, Opts, Histogram, HistogramOpts};
 
 #[derive(Clone)]
 pub struct Prometheus {
@@ -71,7 +71,10 @@ macro_rules! load {
 impl StateProvider {
     pub fn new() -> Result<StateProvider, Error> {
         let db = ::trangarcom::establish_connection()?;
-        Ok(StateProvider { db, prometheus: Prometheus::default() })
+        Ok(StateProvider {
+            db,
+            prometheus: Prometheus::default(),
+        })
     }
 
     pub fn create_state(&self) -> AppState {
@@ -93,18 +96,30 @@ impl StateProvider {
     }
 }
 
-fn handlebars_equals(h: &Helper, hbs: &Handlebars, rc: &mut RenderContext) -> HelperResult {
+fn handlebars_equals<'reg, 'rc>(
+    h: &Helper<'reg, 'rc>,
+    hbs: &'reg Handlebars,
+    context: &Context,
+    rc: &mut RenderContext<'reg>,
+    out: &mut Output,
+) -> HelperResult {
     let first = h.param(0).unwrap();
     let second = h.param(1).unwrap();
 
     if first.value() == second.value() {
-        h.template().unwrap().render(hbs, rc)
+        h.template().unwrap().render(hbs, context, rc, out)
     } else {
         Ok(())
     }
 }
 
-fn handlebars_markdown(h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> HelperResult {
+fn handlebars_markdown<'reg, 'rc>(
+    h: &Helper<'reg, 'rc>,
+    _: &'reg Handlebars,
+    _: &Context,
+    _: &mut RenderContext<'reg>,
+    out: &mut Output,
+) -> HelperResult {
     use pulldown_cmark::{html, Parser};
 
     let value = h.param(0).unwrap().value().as_str().unwrap();
@@ -113,6 +128,6 @@ fn handlebars_markdown(h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> He
 
     let mut html_buf = String::new();
     html::push_html(&mut html_buf, parser);
-    rc.writer.write(html_buf.as_bytes()).unwrap();
+    out.write(&html_buf)?;
     Ok(())
 }

@@ -23,16 +23,7 @@ table! {
     }
 }
 
-table! {
-    users (id) {
-        id -> Int4,
-        name -> Text,
-        birthdate -> Text,
-    }
-}
-
 allow_tables_to_appear_in_same_query!(
     blogpost,
     request,
-    users,
 );

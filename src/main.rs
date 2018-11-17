@@ -1,5 +1,4 @@
 #![allow(proc_macro_derive_resolution_fallback)]
-#![feature(const_fn)]
 
 extern crate actix;
 extern crate actix_web;
@@ -14,8 +13,14 @@ extern crate trangarcom;
 extern crate uuid;
 #[macro_use]
 extern crate serde_derive;
+#[macro_use]
+extern crate lazy_static;
 extern crate prometheus;
+extern crate rusoto_core;
+extern crate rusoto_credential;
+extern crate rusoto_dynamodb;
 extern crate serde;
+extern crate tokio;
 
 mod logger;
 mod state;

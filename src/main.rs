@@ -1,4 +1,5 @@
-#![feature(proc_macro_gen)]
+#![allow(proc_macro_derive_resolution_fallback)]
+#![feature(const_fn)]
 
 extern crate actix;
 extern crate actix_web;

@@ -1,20 +1,35 @@
 use actix_web::error::Result;
 use actix_web::middleware::{Finished, Middleware, Response, Started};
-use actix_web::{Binary, Body, HttpMessage, HttpRequest, HttpResponse};
-use chrono;
-use futures::future;
+use actix_web::{Binary, Body, HttpRequest, HttpResponse};
+use chrono::{DateTime, TimeZone, Utc};
 use prometheus::HistogramTimer;
 use state::AppState;
-use time;
-use trangarcom;
-use uuid::Uuid;
+use std::sync::{Arc, Mutex};
 
-#[derive(Default)]
-pub struct Logger;
+static LOGGER: Logger = Logger {
+    logs: Arc::new(Mutex::new(Vec::new())),
+};
+
+#[derive(Clone)]
+pub struct Logger {
+    logs: Arc<Mutex<Vec<LogEntry>>>,
+}
+
+impl Default for Logger {
+    fn default() -> Logger {
+        LOGGER.clone()
+    }
+}
+
+pub struct LogEntry {
+    status_code: u16,
+    start: DateTime<Utc>,
+    end: DateTime<Utc>,
+    response_size: Option<usize>,
+}
 
 struct LogData {
-    id: Uuid,
-    start: f64,
+    start: DateTime<Utc>,
     timer: HistogramTimer,
 }
 
@@ -25,17 +40,8 @@ impl Middleware<AppState> for Logger {
         }
         let timer = req.state().prometheus.request_timer.start_timer();
 
-        let request = trangarcom::models::Request {
-            time: chrono::Utc::now().naive_utc(),
-            url: req.uri().to_string(),
-            headers: format!("{:?}", req.headers()),
-        };
-
-        let id = request.save(&req.state().db)?;
-
         req.extensions_mut().insert(LogData {
-            id,
-            start: time::precise_time_s(),
+            start: Utc::now(),
             timer,
         });
 
@@ -43,52 +49,35 @@ impl Middleware<AppState> for Logger {
     }
 
     fn response(&self, request: &HttpRequest<AppState>, resp: HttpResponse) -> Result<Response> {
+        let mut entry = LogEntry {
+            status_code: resp.status().as_u16(),
+            start: Utc.timestamp_millis(0),
+            end: Utc::now(),
+            response_size: get_response_length(&resp),
+        };
+
         if let Some(data) = request.extensions().get::<LogData>() {
-            let status_code = resp.status().as_u16() as i16;
-            trangarcom::models::Request::set_response(
-                time::precise_time_s() - data.start,
-                status_code,
-                &data.id,
-                &request.state().db,
-            )?;
-
-            request
-                .state()
-                .prometheus
-                .response
-                .with_label_values(&["all"])
-                .inc();
-
-            request
-                .state()
-                .prometheus
-                .response
-                .with_label_values(&[&status_code.to_string()])
-                .inc();
+            entry.start = data.start;
         }
-        if let Some(size) = get_response_length(&resp) {
-            request
-                .state()
-                .prometheus
-                .response_size
-                .observe(size as f64);
-        }
+        request
+            .state()
+            .prometheus
+            .response
+            .with_label_values(&["all"])
+            .inc();
+
+        request
+            .state()
+            .prometheus
+            .response
+            .with_label_values(&[&entry.status_code.to_string()])
+            .inc();
+
         Ok(Response::Done(resp))
     }
 
     fn finish(&self, request: &HttpRequest<AppState>, _resp: &HttpResponse) -> Finished {
         if let Some(data) = request.extensions_mut().remove::<LogData>() {
-            if let Err(e) = trangarcom::models::Request::set_finish_time(
-                time::precise_time_s() - data.start,
-                &data.id,
-                &request.state().db,
-            ) {
-                use futures::Future;
-                type FutureType =
-                    Box<Future<Error = ::actix_web::error::Error, Item = ()> + 'static>;
-                let future: FutureType = Box::new(future::err(e).map_err(Into::into));
-                return Finished::Future(future);
-            }
             data.timer.observe_duration();
         }
         Finished::Done
@@ -107,3 +96,9 @@ fn get_response_length(res: &HttpResponse) -> Option<usize> {
         Body::Actor(_) => None,
     }
 }
+
+pub struct LogUploaderService {
+    logger: Logger,
+}
+
+impl LogUploaderService {}

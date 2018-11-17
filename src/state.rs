@@ -1,6 +1,7 @@
 use failure::Error;
 use handlebars::{Context, Handlebars, Helper, HelperResult, Output, RenderContext, Renderable};
 use prometheus::{Histogram, HistogramOpts, IntCounterVec, Opts, Registry};
+use std::sync::Arc;
 use trangarcom::DbConnection;
 
 #[derive(Clone)]
@@ -36,14 +37,15 @@ impl Default for Prometheus {
     }
 }
 pub struct AppState {
-    pub db: DbConnection,
+    pub db: Arc<DbConnection>,
     pub hbs: Handlebars,
-    pub prometheus: Prometheus,
+    pub prometheus: Arc<Prometheus>,
 }
 
+#[derive(Clone)]
 pub struct StateProvider {
-    db: DbConnection,
-    prometheus: Prometheus,
+    db: Arc<DbConnection>,
+    prometheus: Arc<Prometheus>,
 }
 
 macro_rules! load {
@@ -72,8 +74,8 @@ impl StateProvider {
     pub fn new() -> Result<StateProvider, Error> {
         let db = ::trangarcom::establish_connection()?;
         Ok(StateProvider {
-            db,
-            prometheus: Prometheus::default(),
+            db: Arc::new(db),
+            prometheus: Arc::new(Prometheus::default()),
         })
     }
 

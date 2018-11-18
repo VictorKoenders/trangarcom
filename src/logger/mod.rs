@@ -7,7 +7,7 @@ use rusoto_core::{HttpClient, Region};
 use rusoto_credential::EnvironmentProvider;
 use rusoto_dynamodb::{DynamoDb, DynamoDbClient, PutItemInput};
 use state::AppState;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 mod data;
 mod entry;
@@ -17,7 +17,6 @@ use self::entry::LogEntry;
 
 lazy_static! {
     static ref LOGGER: Logger = Logger {
-        logs: Arc::new(Mutex::new(Vec::new())),
         dynamo_db_client: Arc::new(DynamoDbClient::new_with(
             HttpClient::new().unwrap(),
             EnvironmentProvider::default(),
@@ -28,8 +27,13 @@ lazy_static! {
 
 #[derive(Clone)]
 pub struct Logger {
-    logs: Arc<Mutex<Vec<LogEntry>>>,
     dynamo_db_client: Arc<DynamoDbClient>,
+}
+
+impl Default for Logger {
+    fn default() -> Logger {
+        LOGGER.clone()
+    }
 }
 
 impl Logger {
@@ -46,12 +50,6 @@ impl Logger {
                 .map(|_| ())
                 .map_err(|e| println!("Error {:?}", e)),
         );
-    }
-}
-
-impl Default for Logger {
-    fn default() -> Logger {
-        LOGGER.clone()
     }
 }
 
@@ -76,6 +74,8 @@ impl Middleware<AppState> for Logger {
             start: Utc.timestamp_millis(0),
             end: Utc::now(),
             response_size: get_response_length(&resp),
+            uri: request.uri(),
+            headers: request.request().headers(),
         };
 
         if let Some(data) = request.extensions().get::<LogData>() {

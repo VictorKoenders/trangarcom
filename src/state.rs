@@ -1,6 +1,7 @@
 use failure::Error;
 use handlebars::{Context, Handlebars, Helper, HelperResult, Output, RenderContext, Renderable};
 use prometheus::{Histogram, HistogramOpts, IntCounterVec, Opts, Registry};
+use serde_json::Value;
 use std::sync::Arc;
 use trangarcom::DbConnection;
 
@@ -84,6 +85,8 @@ impl StateProvider {
         hbs.set_strict_mode(true);
         hbs.register_helper("equals", Box::new(handlebars_equals));
         hbs.register_helper("markdown", Box::new(handlebars_markdown));
+        hbs.register_helper("if_is_even", Box::new(handlebars_is_even));
+        hbs.register_helper("if_is_odd", Box::new(handlebars_is_odd));
 
         load!(hbs, template index);
         load!(hbs, template blog);
@@ -113,6 +116,43 @@ fn handlebars_equals<'reg, 'rc>(
     } else {
         Ok(())
     }
+}
+
+fn handlebars_is_even<'reg, 'rc>(
+    h: &Helper<'reg, 'rc>,
+    hbs: &'reg Handlebars,
+    context: &Context,
+    rc: &mut RenderContext<'reg>,
+    out: &mut Output,
+) -> HelperResult {
+    let first = h.param(0).unwrap();
+
+    if let Value::Number(n) = first.value() {
+        if let Some(n) = n.as_i64() {
+            if n % 2 == 0 {
+                return h.template().unwrap().render(hbs, context, rc, out);
+            }
+        }
+    }
+    Ok(())
+}
+fn handlebars_is_odd<'reg, 'rc>(
+    h: &Helper<'reg, 'rc>,
+    hbs: &'reg Handlebars,
+    context: &Context,
+    rc: &mut RenderContext<'reg>,
+    out: &mut Output,
+) -> HelperResult {
+    let first = h.param(0).unwrap();
+
+    if let Value::Number(n) = first.value() {
+        if let Some(n) = n.as_i64() {
+            if n % 2 == 1 {
+                return h.template().unwrap().render(hbs, context, rc, out);
+            }
+        }
+    }
+    Ok(())
 }
 
 fn handlebars_markdown<'reg, 'rc>(

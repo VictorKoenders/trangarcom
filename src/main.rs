@@ -20,15 +20,18 @@ extern crate rusoto_core;
 extern crate rusoto_credential;
 extern crate rusoto_dynamodb;
 extern crate serde;
+extern crate serde_json;
 extern crate tokio;
 
 mod logger;
 mod state;
 
 use actix_web::{http, server, App, Form, HttpMessage, HttpRequest, HttpResponse};
+use failure::Error;
 use logger::Logger;
 use state::{AppState, StateProvider};
 use std::collections::BTreeMap;
+use trangarcom::models::PortfolioSummary;
 
 #[derive(Deserialize, Debug)]
 pub struct PrivacySettings {
@@ -42,21 +45,21 @@ pub struct IndexValues {
     pub anonymize_logging: bool,
     pub headers: String,
     pub url: String,
+    pub portfolio_items: Vec<PortfolioSummary>,
 }
 
-fn index(req: &HttpRequest<AppState>) -> HttpResponse {
+fn index(req: &HttpRequest<AppState>) -> Result<HttpResponse, Error> {
+    let portfolio_items = PortfolioSummary::load_latest(&req.state().db)?;
     let values = IndexValues {
         load_twitter: req.cookie("twitter_visible").is_some(),
         anonymize_logging: req.cookie("anonymize_logging").is_some(),
         headers: format!("{:?}", req.headers()),
         url: req.uri().to_string(),
+        portfolio_items,
     };
-    HttpResponse::Ok().content_type("text/html").body(
-        req.state()
-            .hbs
-            .render("index", &values)
-            .expect("Could not render template \"index\""),
-    )
+    Ok(HttpResponse::Ok()
+        .content_type("text/html")
+        .body(req.state().hbs.render("index", &values)?))
 }
 
 fn index_post((form, req): (Form<PrivacySettings>, HttpRequest<AppState>)) -> HttpResponse {
@@ -153,18 +156,21 @@ fn main() -> Result<(), failure::Error> {
             .resource("/", |r| {
                 r.get().f(index);
                 r.post().with(index_post);
-            }).resource("/prometheus", |r| r.f(get_prometheus))
+            })
+            .resource("/prometheus", |r| r.f(get_prometheus))
             .resource("/blog/{seo_name}", |r| r.f(blog_detail))
             .resource("/blog", |r| r.f(blog_list))
             .resource("/resume", |r| r.f(resume))
             .handler(
                 "/images",
                 actix_web::fs::StaticFiles::new("images").unwrap(),
-            ).handler(
+            )
+            .handler(
                 "/static",
                 actix_web::fs::StaticFiles::new("static").unwrap(),
             )
-    }).bind("0.0.0.0:8000")
+    })
+    .bind("0.0.0.0:8000")
     .expect("Can not bind to port 8000")
     .start();
 

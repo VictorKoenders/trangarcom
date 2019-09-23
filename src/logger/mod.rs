@@ -17,17 +17,17 @@ use self::entry::LogEntry;
 
 lazy_static! {
     static ref LOGGER: Logger = Logger {
-        dynamo_db_client: Arc::new(DynamoDbClient::new_with(
+        /*dynamo_db_client: Arc::new(DynamoDbClient::new_with(
             HttpClient::new().unwrap(),
             EnvironmentProvider::default(),
             Region::EuCentral1,
-        ))
+        ))*/
     };
 }
 
 #[derive(Clone)]
 pub struct Logger {
-    dynamo_db_client: Arc<DynamoDbClient>,
+    // dynamo_db_client: Arc<DynamoDbClient>,
 }
 
 impl Default for Logger {
@@ -38,7 +38,7 @@ impl Default for Logger {
 
 impl Logger {
     pub fn log_entry(&self, entry: &LogEntry) {
-        let item = entry.to_attribute_value_map();
+        /*let item = entry.to_attribute_value_map();
         let input = PutItemInput {
             item,
             table_name: "trangar.com.requests".to_owned(),
@@ -49,7 +49,7 @@ impl Logger {
                 .put_item(input)
                 .map(|_| ())
                 .map_err(|e| println!("Error {:?}", e)),
-        );
+        );*/
     }
 }
 

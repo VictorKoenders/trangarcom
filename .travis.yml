@@ -1,0 +1,23 @@
+language: rust
+dist: xenial
+services:
+    - docker
+addons:
+    apt:
+        packages:
+            - libssl-dev
+        script:
+            - cargo test || travis_terminate 1;
+            - cargo build --release || travis_terminate 1;
+            - docker build -t trangarcom . || travis_terminate 1;
+        before_deploy:
+            - docker save trangarcom --output trangarcom.tar
+        deploy:
+            provider: releases
+            api_key:
+                secure: oL61pxd6Eac8mTGHDqBrpE5i/OGXqmtKA8UzA1AxH5ThXlMhhCxH9JzrOvk/jYeHHjMJODXWEgjBib/quGB3KBR8JB/u6OOdStsTIofrcYrKa69yF5dDegDnVb+8MilVig9hJnciAwfkTBXhs8GRTaX7197g1aemXEooBTmS5cYQUAzy6bBnjHWnEQYniShS/dVBYxKTm1NjaDfd+XXwJE4iMFdW0kCMeZmav6Z6+w6fbssnfhxihomJw0Bt2U//VUSUU87swhcUUuJYM7VNE2gRIVAYo1lHmbrKu8xuB6WAhh1OtoHSclhrbqnHngSddwQNVs3YfuRQagtNc5GT6RAfwxMwGtktN2SeLSw8lCIHUW1GjUW/y2031v2pcnEwaFc27V8C7OEbWzMx+ntuT8WVCM3SeOzj+EEcR052FR1yF4u9qztLB/quBDIxBlaHjyjZYLQnPPSrlHe9/hVRRhf3zYw7TYxtkch1F/dJZ+4K8WaDwb8BtCktCEfp3JP2FUMLsfLh4sYiAfMJN8ZDcXaFCBlkBMdRRoEz5upA7UHE4gPzV6pYFKFZ+NC8F5ljQcbZGvbLCY5G271AlPCK9pUj8672sPwl6bAckXWBs682eDWjWRfnmvhbKTQPgvqubJSbmZEYaGvP5/t+q7Y1AC7S+3h9U/RA+B1xpj/niIA=
+                file: trangarcom.tar
+                skip_cleanup: true
+                on:
+                    repo: VictorKoenders/trangarcom
+                    tags: true

@@ -1,153 +1,235 @@
-#![allow(proc_macro_derive_resolution_fallback)]
+#![feature(proc_macro_hygiene, decl_macro, never_type)]
 
-extern crate actix;
-extern crate actix_web;
-extern crate chrono;
-extern crate dotenv;
-extern crate failure;
-extern crate futures;
-extern crate handlebars;
-extern crate pulldown_cmark;
-extern crate time;
-extern crate trangarcom;
-extern crate uuid;
 #[macro_use]
-extern crate serde_derive;
+extern crate rocket;
 #[macro_use]
-extern crate lazy_static;
-extern crate prometheus;
-extern crate rusoto_core;
-extern crate rusoto_credential;
-extern crate rusoto_dynamodb;
-extern crate serde;
-extern crate serde_json;
-extern crate tokio;
+extern crate rocket_contrib;
 
-mod logger;
-mod state;
+mod fairings;
+mod rocket_utils;
 
-use actix_web::{http, server, App, Form, HttpMessage, HttpRequest, HttpResponse};
+use askama::Template;
 use failure::Error;
-use logger::Logger;
-use state::{AppState, StateProvider};
-use std::collections::BTreeMap;
-use trangarcom::models::PortfolioSummary;
+use rocket::http::{uri::Origin, Cookie, Cookies, RawStr};
+use rocket::request::Form;
+use rocket::response::{content::Html, Redirect};
+use rocket_utils::{Database, Header, Headers};
 
-#[derive(Deserialize, Debug)]
+pub const COOKIE_TWITTER_VISIBLE: &str = "twitter_visible";
+pub const COOKIE_ANONYMIZE_LOGGING: &str = "anonymize_logging";
+
+#[derive(FromForm, Debug)]
 pub struct PrivacySettings {
-    pub load_twitter: Option<u8>,
-    pub anonymize_logging: Option<u8>,
+    pub load_twitter: bool,
+    pub anonymize_logging: bool,
 }
 
-#[derive(Serialize)]
-pub struct IndexValues {
+#[derive(Template)]
+#[template(path = "index.html")]
+pub struct IndexValues<'a> {
+    pub header: Header<'a>,
     pub load_twitter: bool,
     pub anonymize_logging: bool,
     pub headers: String,
     pub url: String,
-    pub portfolio_items: Vec<PortfolioSummary>,
 }
 
-fn index(req: &HttpRequest<AppState>) -> Result<HttpResponse, Error> {
-    let portfolio_items = PortfolioSummary::load_latest(&req.state().db)?;
+#[get("/")]
+fn index(
+    origin: &Origin,
+    _db: Database,
+    headers: Headers,
+    cookie: Cookies,
+) -> Result<Html<String>, Error> {
     let values = IndexValues {
-        load_twitter: req.cookie("twitter_visible").is_some(),
-        anonymize_logging: req.cookie("anonymize_logging").is_some(),
-        headers: format!("{:?}", req.headers()),
-        url: req.uri().to_string(),
-        portfolio_items,
+        header: Header::new(origin),
+        load_twitter: cookie.get(COOKIE_TWITTER_VISIBLE).is_some(),
+        anonymize_logging: cookie.get(COOKIE_ANONYMIZE_LOGGING).is_some(),
+        headers: headers.0,
+        url: origin.to_string(),
     };
-    Ok(HttpResponse::Ok()
-        .content_type("text/html")
-        .body(req.state().hbs.render("index", &values)?))
+    Ok(Html(values.render()?))
 }
 
-fn index_post((form, req): (Form<PrivacySettings>, HttpRequest<AppState>)) -> HttpResponse {
-    let mut response = HttpResponse::Found();
-    response.header("location", "/");
-    let cookie = req.cookie("twitter_visible");
-    match (cookie, form.load_twitter) {
-        (Some(ref c), None) => {
-            response.del_cookie(c);
+#[post("/", data = "<data>")]
+fn index_post(data: Form<PrivacySettings>, mut cookies: Cookies) -> Redirect {
+    match (
+        cookies.get(COOKIE_TWITTER_VISIBLE).is_some(),
+        data.load_twitter,
+    ) {
+        (true, false) => {
+            cookies.remove(Cookie::named(COOKIE_TWITTER_VISIBLE));
         }
-        (None, Some(n)) if n > 0 => {
-            response.cookie(http::Cookie::build("twitter_visible", "1").finish());
+        (false, true) => {
+            cookies.add(Cookie::new(COOKIE_TWITTER_VISIBLE, "1"));
         }
         _ => {}
     }
-    let cookie = req.cookie("anonymize_logging");
-    match (cookie, form.anonymize_logging) {
-        (Some(ref c), None) => {
-            response.del_cookie(c);
+    match (
+        cookies.get(COOKIE_ANONYMIZE_LOGGING).is_some(),
+        data.anonymize_logging,
+    ) {
+        (true, false) => {
+            cookies.remove(Cookie::named(COOKIE_ANONYMIZE_LOGGING));
         }
-        (None, Some(n)) if n > 0 => {
-            response.cookie(http::Cookie::build("anonymize_logging", "1").finish());
+        (false, true) => {
+            cookies.add(Cookie::new(COOKIE_ANONYMIZE_LOGGING, "1"));
         }
         _ => {}
     }
-    response.finish()
+    Redirect::to("/")
 }
 
-fn blog_list(req: &HttpRequest<AppState>) -> HttpResponse {
-    let items = trangarcom::models::BlogListItem::load_blog_posts(&req.state().db, 10, 0).unwrap();
-
-    let mut data = BTreeMap::new();
-    data.insert("blog_items".to_string(), items);
-
-    HttpResponse::Ok().content_type("text/html").body(
-        req.state()
-            .hbs
-            .render("blog", &data)
-            .expect("Could not render template \"blog\""),
-    )
+#[derive(Template)]
+#[template(path = "blog.html")]
+pub struct BlogPosts<'a> {
+    pub header: Header<'a>,
+    pub blog_items: Vec<BlogPost<'a>>,
 }
-fn blog_detail(req: &HttpRequest<AppState>) -> HttpResponse {
-    let name = match req.match_info().get("seo_name") {
-        Some(name) => name,
-        None => {
-            return HttpResponse::MovedPermanently()
-                .header("Location", "/blog")
-                .finish()
-        }
-    };
-    match trangarcom::models::BlogItem::load(&req.state().db, &name)
-        .expect("Could not load blog item")
-    {
-        Some(item) => HttpResponse::Ok().content_type("text/html").body(
-            req.state()
-                .hbs
-                .render("blog_detail", &item)
-                .expect("Could not render template \"blog_detail\""),
-        ),
-        None => HttpResponse::MovedPermanently()
-            .header("Location", "/blog")
-            .finish(),
+
+pub struct BlogPost<'a> {
+    pub title: &'a str,
+    pub seo_name: &'a str,
+    pub date: &'a chrono::NaiveDate,
+    summary: &'a str,
+}
+
+impl BlogPost<'_> {
+    fn summary(&self) -> String {
+        let parser = pulldown_cmark::Parser::new(&self.summary);
+
+        let mut html_buf = String::new();
+        pulldown_cmark::html::push_html(&mut html_buf, parser);
+
+        html_buf
     }
 }
 
-fn resume(req: &HttpRequest<AppState>) -> HttpResponse {
-    HttpResponse::Ok().content_type("text/html").body(
-        req.state()
-            .hbs
-            .render("resume", &())
-            .expect("Could not render template \"resume\""),
-    )
+impl<'a> From<&'a trangarcom::models::BlogListItem> for BlogPost<'a> {
+    fn from(item: &'a trangarcom::models::BlogListItem) -> BlogPost<'a> {
+        BlogPost {
+            title: &item.title,
+            seo_name: &item.seo_name,
+            date: &item.date,
+            summary: &item.summary,
+        }
+    }
 }
 
-fn get_prometheus(req: &HttpRequest<AppState>) -> String {
+#[get("/blog")]
+fn blog_list(origin: &Origin, db: Database) -> Result<Html<String>, Error> {
+    let items = trangarcom::models::BlogListItem::load_blog_posts(&db, 10, 0).unwrap();
+    Ok(Html(
+        BlogPosts {
+            header: Header::new(origin),
+            blog_items: items.iter().map(Into::into).collect(),
+        }
+        .render()?,
+    ))
+}
+
+#[derive(Template)]
+#[template(path = "blog_detail.html")]
+pub struct BlogDetail<'a> {
+    pub header: Header<'a>,
+    pub blog: trangarcom::models::BlogItem,
+}
+
+impl BlogDetail<'_> {
+    pub fn render_content(&self) -> String {
+        let parser = pulldown_cmark::Parser::new(&self.blog.content);
+
+        let mut html_buf = String::new();
+        pulldown_cmark::html::push_html(&mut html_buf, parser);
+
+        html_buf
+    }
+}
+
+#[get("/blog/<seo_name>")]
+fn blog_detail(seo_name: &RawStr, origin: &Origin, db: Database) -> Result<Html<String>, Error> {
+    let blog = trangarcom::models::BlogItem::load(&db, seo_name.as_str())?
+        .ok_or_else(|| failure::format_err!("Could not find blogitem"))?;
+    Ok(Html(
+        BlogDetail {
+            header: Header::new(origin),
+            blog,
+        }
+        .render()?,
+    ))
+}
+
+#[derive(Template)]
+#[template(path = "resume.html")]
+struct ResumeView<'a> {
+    header: Header<'a>,
+}
+
+#[get("/resume")]
+fn resume(origin: &Origin) -> Result<Html<String>, Error> {
+    Ok(Html(
+        ResumeView {
+            header: Header::new(origin),
+        }
+        .render()?,
+    ))
+}
+
+#[get("/prometheus")]
+fn get_prometheus() -> Result<String, Error> {
     use prometheus::{Encoder, TextEncoder};
 
     let mut buffer = vec![];
     let encoder = TextEncoder::new();
-    let metric_familys = req.state().prometheus.registry.gather();
-    encoder.encode(&metric_familys, &mut buffer).unwrap();
-    String::from_utf8(buffer).unwrap()
+    // let metric_familys = req.state().prometheus.registry.gather();
+    // encoder.encode(&metric_familys, &mut buffer).unwrap();
+    Ok(String::from_utf8(buffer)?)
 }
 
-fn main() -> Result<(), failure::Error> {
-    dotenv::dotenv()?;
+fn main() {
+    if let Err(e) = dotenv::dotenv() {
+        println!("Could not load .env");
+    }
+    use rocket::config::{Config, Environment, Value};
+    use std::collections::HashMap;
 
-    let sys = actix::System::new("trangarcom");
+    let mut database_config = HashMap::new();
+    let mut databases = HashMap::new();
+
+    // This is the same as the following TOML:
+    //     // my_db = { url = "database.sqlite" }
+    database_config.insert(
+        "url",
+        Value::from(std::env::var("DATABASE_URL").expect("DATABASE_URL not set")),
+    );
+    databases.insert("DATABASE", Value::from(database_config));
+    let config = Config::build(Environment::Development)
+        .address("0.0.0.0")
+        .extra("databases", databases)
+        .finalize()
+        .unwrap();
+    let err = rocket::custom(config)
+        .attach(Database::fairing())
+        .attach(fairings::Logger)
+        .mount(
+            "/",
+            routes![
+                index,
+                index_post,
+                blog_list,
+                blog_detail,
+                resume,
+                get_prometheus
+            ],
+        )
+        .mount(
+            "/static",
+            rocket_contrib::serve::StaticFiles::from("static"),
+        )
+        .launch();
+    eprintln!("Rocket ended: {:?}", err);
+
+    /*let sys = actix::System::new("trangarcom");
     let state_provider = StateProvider::new()?;
     server::new(move || {
         let logger = Logger::default();
@@ -175,5 +257,5 @@ fn main() -> Result<(), failure::Error> {
     .start();
 
     sys.run();
-    Ok(())
+    Ok(())*/
 }

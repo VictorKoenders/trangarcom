@@ -1,36 +1,32 @@
 [package]
 name = "trangarcom"
 version = "0.1.0"
+edition = "2018"
 authors = ["Victor Koenders <victor.koenders@gmail.com>"]
 
 [profile.release]
 lto = true
 
 [dependencies]
-actix-web = "0.7.14"
-actix = "0.7.6" #dependent on actix-web's version
-futures = "0.1.25" # dependent on actix-web and actix's version
-tokio = "0.1.11" # dependent on actix's version
-
-diesel = { version = "1.3.3", features = ["postgres", "uuid", "chrono", "r2d2"] }
-r2d2 = "0.8.3" # dependent on diesel's version
-uuid = { version = "0.6.5", features = ["v4"] } # dependent on diesel's version
-
+rocket = "0.4"
+rocket_contrib = { version = "0.4", features = ["diesel_postgres_pool", "serve"], default-features = false }
+diesel = { version = "1.4", features = ["postgres", "uuidv07", "chrono", "r2d2"] }
+r2d2 = "0.8" # dependent on diesel's version
+uuid = { version = "0.7", features = ["v4"] } # dependent on diesel's version
 time = "0.1.40"
-dotenv = "0.13.0"
-chrono = { version = "0.4.6", features = ["serde"] }
-failure = "0.1.3"
-handlebars = "1.1.0"
-pulldown-cmark = { version = "0.2.0", default-features = false }
-
-serde_json = "1.0.33"
-serde = "1.0.80" # dependent on serde_json's version
-serde_derive = "1.0.80" # dependent on serde_json's version
-
-lazy_static = "1.2.0"
-rusoto_core = "0.35.0"
-rusoto_credential = "0.14.0"
-rusoto_dynamodb = "0.35.0"
+dotenv = "0.14"
+chrono = { version = "0.4", features = ["serde"] }
+failure = "0.1"
+pulldown-cmark = { version = "0.6", default-features = false }
+askama = "0.8"
+parking_lot = "0.9"
+serde_json = "1.0"
+serde = "1.0"
+serde_derive = "1.0"
+lazy_static = "1.3"
+# rusoto_core = "0.35.0"
+# rusoto_credential = "0.14.0"
+# rusoto_dynamodb = "0.35.0"
 
 [dependencies.prometheus]
 git = "https://github.com/pingcap/rust-prometheus.git"

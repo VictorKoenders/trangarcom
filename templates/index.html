@@ -1,9 +1,9 @@
-{{#> layout title="" current="home"}}
-
-{{#if load_twitter}}
+{% extends "layout.html" %}
+{% block content %}
+{% if load_twitter %}
 <div class="row">
     <div class="col-md-8">
-        {{/if}}
+{% endif %}
 
         <h1>Welcome</h1>
         <p>
@@ -12,25 +12,6 @@
             <a href="/resume">resume</a> or
             <a href="https://github.com/victorkoenders" target="_blank">Github</a>
         </p>
-        {{#each portfolio_items}}
-        <div class="row">
-            {{#if_is_even @index}}
-            <div class="col-md-4">
-                <img src="{{summary_image}}" alt="{{seo_name}} preview" />
-            </div>
-            {{/if_is_even}}
-            <div class="col-md-8">
-                <h2>{{title}}</h2>
-                {{markdown summary}}
-                <a href="/portfolio/{{seo_name}}">Read more</a>
-            </div>
-            {{#if_is_odd @index}}
-            <div class="col-md-4">
-                <img src="{{summary_image}}" alt="{{seo_name}} preview" />
-            </div>
-            {{/if_is_odd}}
-        </div>
-        {{/each}}
         <form method="POST" action="/">
             <div class="row">
                 <div class="col-md-10">
@@ -69,8 +50,8 @@
                 </div>
                 <div class="col-md-2">
                     <p>Anonymize logging:</p>
-                    <input type="checkbox" {{#if anonymize_logging}} checked="checked"
-                        {{/if}} name="anonymize_logging" value="1" />
+                    <input type="checkbox" {% if anonymize_logging %} checked="checked"
+                        {% endif %} name="anonymize_logging" value="on" />
                 </div>
             </div>
             <div class="row">
@@ -86,8 +67,8 @@
                 </div>
                 <div class="col-md-2">
                     <p>Show the twitter feed:</p>
-                    <input type="checkbox" {{#if load_twitter}} checked="checked"
-                        {{/if}} name="load_twitter" value="1" />
+                    <input type="checkbox" {% if load_twitter%} checked="checked"
+                        {% endif%} name="load_twitter" value="on" />
                 </div>
             </div>
             <div class="row">
@@ -96,7 +77,7 @@
                 </div>
             </div>
         </form>
-        {{#if load_twitter}}
+        {% if load_twitter %}
     </div>
     <div class="col-md-4">
         <a class="twitter-timeline" href="https://twitter.com/victorkoenders?ref_src=twsrc%5Etfw">Tweets
@@ -104,5 +85,7 @@
         <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
     </div>
 </div>
-{{/if}}
-{{/layout}}
+{% endif %}
+{% endblock content %}
+
+

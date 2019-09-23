@@ -1,8 +1,6 @@
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+use crate::schema::portfoliopost;
+use diesel::{ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 use failure::Error;
-use schema::portfoliopost;
-
-use DbConnection;
 
 #[derive(Queryable, Clone, Serialize)]
 pub struct PortfolioSummary {
@@ -13,8 +11,7 @@ pub struct PortfolioSummary {
 }
 
 impl PortfolioSummary {
-    pub fn load_latest(db: &DbConnection) -> Result<Vec<PortfolioSummary>, Error> {
-        let conn = db.conn.get()?;
+    pub fn load_latest(conn: &PgConnection) -> Result<Vec<PortfolioSummary>, Error> {
         portfoliopost::table
             .filter(portfoliopost::dsl::published.eq(true))
             .limit(5)
@@ -24,7 +21,7 @@ impl PortfolioSummary {
                 portfoliopost::dsl::summary,
                 portfoliopost::dsl::summary_image,
             ))
-            .get_results(&conn)
+            .get_results(conn)
             .map_err(Into::into)
     }
 }

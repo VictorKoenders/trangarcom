@@ -1,4 +1,8 @@
-{{#>layout title="Resume" current="resume"}}
+{% extends "layout.html" %}
+{% block css %}
+<link href="/static/resume.css" rel="stylesheet" type="text/css">
+{% endblock css %}
+{% block content %}
 <div class="resume_container">
 	<div class="left">
 		<h1>Victor Koenders</h1>
@@ -164,4 +168,4 @@
 		</table>
 	</div>
 </div>
-{{/layout}}
+{% endblock content %}

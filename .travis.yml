@@ -1,7 +1,13 @@
 language: rust
+rust:
+    # Rocket is stuck on nightly unfortunately
+    # https://github.com/SergioBenitez/Rocket/issues/19
+    nightly
+
 dist: xenial
 services:
     - docker
+
 addons:
     apt:
         packages:

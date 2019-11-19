@@ -8,10 +8,11 @@ extern crate rocket_contrib;
 mod fairings;
 mod rocket_utils;
 
+use crate::fairings::Prometheus;
 use askama::Template;
 use failure::Error;
 use rocket::http::{uri::Origin, Cookie, Cookies, RawStr};
-use rocket::request::Form;
+use rocket::request::{Form, State};
 use rocket::response::{content::Html, Redirect};
 use rocket_utils::{Database, Header, Headers};
 
@@ -176,19 +177,13 @@ fn resume(origin: &Origin) -> Result<Html<String>, Error> {
 }
 
 #[get("/prometheus")]
-fn get_prometheus() -> Result<String, Error> {
-    use prometheus::{Encoder, TextEncoder};
-
-    let mut buffer = vec![];
-    let encoder = TextEncoder::new();
-    // let metric_familys = req.state().prometheus.registry.gather();
-    // encoder.encode(&metric_familys, &mut buffer).unwrap();
-    Ok(String::from_utf8(buffer)?)
+fn get_prometheus(state: State<Prometheus>) -> Result<String, Error> {
+    state.get_endpoint_contents()
 }
 
 fn main() {
     if let Err(e) = dotenv::dotenv() {
-        println!("Could not load .env");
+        println!("Could not load .env: {:?}", e);
     }
     use rocket::config::{Config, Environment, Value};
     use std::collections::HashMap;
@@ -211,6 +206,8 @@ fn main() {
     let err = rocket::custom(config)
         .attach(Database::fairing())
         .attach(fairings::Logger)
+        .attach(fairings::PrometheusFairing)
+        .manage(fairings::Prometheus::default())
         .mount(
             "/",
             routes![

@@ -1,9 +1,9 @@
-use prometheus::*;
-use rocket::fairing::{Fairing, Info, Kind};
-use rocket::http::Status;
-use rocket::request::FromRequest;
-use rocket::{Data, Outcome, Request, Response};
 use parking_lot::Mutex;
+use prometheus::{
+    Encoder, Histogram, HistogramOpts, HistogramTimer, IntCounterVec, Opts, Registry, TextEncoder,
+};
+use rocket::fairing::{Fairing, Info, Kind};
+use rocket::{Data, Request, Response, State};
 
 pub struct Prometheus {
     pub request_timer: Histogram,
@@ -17,7 +17,7 @@ impl Default for Prometheus {
         let request_timer = Histogram::with_opts(request_timer_opts).unwrap();
 
         let response_opts = Opts::new("response", "Responses");
-        let response = IntCounterVec::new(response_opts, &["all"]).unwrap();
+        let response = IntCounterVec::new(response_opts, &["code"]).unwrap();
 
         let response_size_opts = HistogramOpts::new("response_size", "Respones size (bytes)");
         let response_size = Histogram::with_opts(response_size_opts).unwrap();
@@ -35,7 +35,19 @@ impl Default for Prometheus {
     }
 }
 
-impl Fairing for Prometheus {
+impl Prometheus {
+    pub fn get_endpoint_contents(&self) -> Result<String, failure::Error> {
+        let mut buffer = vec![];
+        let encoder = TextEncoder::new();
+        let metric_familys = self.registry.gather();
+        encoder.encode(&metric_familys, &mut buffer).unwrap();
+        Ok(String::from_utf8(buffer)?)
+    }
+}
+
+pub struct PrometheusFairing;
+
+impl Fairing for PrometheusFairing {
     fn info(&self) -> Info {
         Info {
             name: "Prometheus stats",
@@ -44,42 +56,27 @@ impl Fairing for Prometheus {
     }
 
     fn on_request(&self, request: &mut Request, _: &Data) {
-        let timer = self.request_timer.start_timer();
+        let state = request.guard::<State<Prometheus>>().unwrap();
+        let timer = state.request_timer.start_timer();
         request.local_cache(|| PrometheusState {
-            registry: self.registry.clone(),
             timer: Mutex::new(Some(timer)),
         });
     }
 
     fn on_response(&self, request: &Request, response: &mut Response) {
-        let state: &PrometheusState = request.local_cache(|| unreachable!());
-        self.response.with_label_values(&["all"]).inc();
-        self.response.with_label_values(&[&response.status().code.to_string()]).inc();
-        if let Some(timer) = state.timer.lock().take() {
+        let state = request.guard::<State<Prometheus>>().unwrap();
+        let request_state: &PrometheusState = request.local_cache(|| unreachable!());
+        state.response.with_label_values(&["all"]).inc();
+        state.response
+            .with_label_values(&[&response.status().code.to_string()])
+            .inc();
+        if let Some(timer) = request_state.timer.lock().take() {
             timer.observe_duration();
         }
     }
 }
 
 struct PrometheusState {
-    registry: Registry,
     timer: Mutex<Option<HistogramTimer>>,
-}
-
-pub struct PrometheusStats {
-    pub registry: Registry,
-}
-
-impl<'a, 'r> FromRequest<'a, 'r> for PrometheusStats {
-    type Error = !;
-
-    fn from_request(request: &'a Request<'r>) -> Outcome<Self, (Status, Self::Error), ()> {
-        let state: &PrometheusState = request
-            .local_cache(|| panic!("We don't have a prometheus state, is the fairing configured?"));
-
-        Outcome::Success(PrometheusStats {
-            registry: state.registry.clone(),
-        })
-    }
 }
 

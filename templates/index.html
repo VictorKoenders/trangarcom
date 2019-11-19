@@ -1,91 +1,11 @@
-{% extends "layout.html" %}
 {% block content %}
-{% if load_twitter %}
-<div class="row">
-    <div class="col-md-8">
-{% endif %}
-
-        <h1>Welcome</h1>
-        <p>
-            I am a developer from the Netherlands who likes Rust, C# and
-            Typescript. For more info you can check out my
-            <a href="/resume">resume</a> or
-            <a href="https://github.com/victorkoenders" target="_blank">Github</a>
-        </p>
-        <form method="POST" action="/">
-            <div class="row">
-                <div class="col-md-10">
-                    <p>
-                        This website tracks some information on your request.
-                        The reason I track this information is because I like
-                        seeing what requests are being done to the website,
-                        mostly to see what fun exploits bots are trying to pull
-                        on my website.
-                    </p>
-                    <p>
-                        You can opt-out of this by checking this checkbox.
-                        Because I cannot actually track you, opting out of
-                        logging will only ignore all your future requests, not
-                        remove the existing logs.
-                        <u>This will set a cookie in your browser.</u>
-                    </p>
-                    <table class="table table-compressed table-hover table-striped">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Value for this request</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>URL</td>
-                                <td>{{url}}</td>
-                            </tr>
-                            <tr>
-                                <td>Browser headers</td>
-                                <td>{{headers}}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="col-md-2">
-                    <p>Anonymize logging:</p>
-                    <input type="checkbox" {% if anonymize_logging %} checked="checked"
-                        {% endif %} name="anonymize_logging" value="on" />
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-10">
-                    <p>
-                        Because twitter uses (3rd party) cookies, viewing
-                        <a href="https://twitter.com/victorkoenders" target="_blank">my
-                            twitter feed</a> is opt-in.<br />
-                        You can enable the twitter feed if you're interested in
-                        seeing it.
-                        <u>This will set a cookie in your browser.</u>
-                    </p>
-                </div>
-                <div class="col-md-2">
-                    <p>Show the twitter feed:</p>
-                    <input type="checkbox" {% if load_twitter%} checked="checked"
-                        {% endif%} name="load_twitter" value="on" />
-                </div>
-            </div>
-            <div class="row">
-                <div class="offset-8 col-md-4">
-                    <button type="submit" class="btn btn-primary">Save settings</button>
-                </div>
-            </div>
-        </form>
-        {% if load_twitter %}
-    </div>
-    <div class="col-md-4">
-        <a class="twitter-timeline" href="https://twitter.com/victorkoenders?ref_src=twsrc%5Etfw">Tweets
-            by @victorkoenders</a>
-        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-    </div>
-</div>
-{% endif %}
+<h1>Welcome</h1>
+<p>
+    I am a developer from the Netherlands who likes Rust, C# and
+    Typescript. For more info you can check out my
+    <a href="/resume">resume</a> or
+    <a href="https://github.com/victorkoenders" target="_blank">Github</a>
+</p>
 {% endblock content %}
 
 

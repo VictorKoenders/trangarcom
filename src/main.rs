@@ -92,18 +92,7 @@ pub struct BlogPost<'a> {
     pub title: &'a str,
     pub seo_name: &'a str,
     pub date: &'a chrono::NaiveDate,
-    summary: &'a str,
-}
-
-impl BlogPost<'_> {
-    fn summary(&self) -> String {
-        let parser = pulldown_cmark::Parser::new(&self.summary);
-
-        let mut html_buf = String::new();
-        pulldown_cmark::html::push_html(&mut html_buf, parser);
-
-        html_buf
-    }
+    pub summary: &'a str,
 }
 
 impl<'a> From<&'a trangarcom::models::BlogListItem> for BlogPost<'a> {

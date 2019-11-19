@@ -1,0 +1,96 @@
+* {
+    padding: 0;
+    margin: 0;
+    font-size: 16pt;
+    font-family: "Roboto", sans-serif;
+}
+
+body {
+    display: flex;
+    padding: 10%;
+}
+
+nav ul {
+    list-style: none;
+    text-align: right;
+    position: relative;
+    padding-right: 2em;
+    margin-right: 2em;
+}
+
+nav ul::after {
+    content: "";
+    height: 90%;
+    background-color: #000;
+    width: 1px;
+    position: absolute;
+    right: 0;
+    top: 5%;
+}
+
+nav ul li a {
+    white-space: nowrap;
+}
+
+a {
+    color: #333;
+    text-decoration: none;
+    vertical-align: middle;
+}
+
+.active a,
+a:hover {
+    color: black;
+    text-decoration: underline;
+}
+
+.github-icon,
+.twitter-icon {
+    width: 16pt;
+    height: 16pt;
+}
+
+h1, p {
+    margin-bottom: 1em;
+}
+
+small {
+    font-size: 60%;
+    font-weight: 100;
+    vertical-align: top;
+}
+
+/* responsive block */
+@media (max-width: 960px) {
+    body {
+        display: block;
+        padding: 5%;
+    }
+
+    nav ul {
+        margin-right: 0;
+        padding-right: 0;
+        margin-bottom: 1em;
+        text-align: center;
+    }
+
+    nav ul li {
+        display: inline-block;
+        min-width: 30%;
+        margin: 1%;
+        height: 3em;
+        text-align: center;
+    }
+
+    nav ul li a {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    nav ul::after {
+        display: none;
+    }
+}
+
+

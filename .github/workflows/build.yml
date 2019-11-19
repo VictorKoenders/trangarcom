@@ -1,4 +1,4 @@
-name: Rust
+name: Build & test
 
 on: [push, pull_request]
 
@@ -12,6 +12,8 @@ jobs:
               with:
                   toolchain: nightly
                   override: true
+            - name: Install packages
+              run: sudo apt-get install libpq-dev libssl-dev
             - name: Build
               run: cargo build --verbose
             - name: Run tests

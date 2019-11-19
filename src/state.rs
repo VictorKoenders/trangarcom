@@ -106,7 +106,7 @@ fn handlebars_equals<'reg, 'rc>(
     hbs: &'reg Handlebars,
     context: &Context,
     rc: &mut RenderContext<'reg>,
-    out: &mut Output,
+    out: &mut dyn Output,
 ) -> HelperResult {
     let first = h.param(0).unwrap();
     let second = h.param(1).unwrap();
@@ -123,7 +123,7 @@ fn handlebars_is_even<'reg, 'rc>(
     hbs: &'reg Handlebars,
     context: &Context,
     rc: &mut RenderContext<'reg>,
-    out: &mut Output,
+    out: &mut dyn Output,
 ) -> HelperResult {
     let first = h.param(0).unwrap();
 
@@ -141,7 +141,7 @@ fn handlebars_is_odd<'reg, 'rc>(
     hbs: &'reg Handlebars,
     context: &Context,
     rc: &mut RenderContext<'reg>,
-    out: &mut Output,
+    out: &mut dyn Output,
 ) -> HelperResult {
     let first = h.param(0).unwrap();
 
@@ -160,7 +160,7 @@ fn handlebars_markdown<'reg, 'rc>(
     _: &'reg Handlebars,
     _: &Context,
     _: &mut RenderContext<'reg>,
-    out: &mut Output,
+    out: &mut dyn Output,
 ) -> HelperResult {
     use pulldown_cmark::{html, Parser};
 

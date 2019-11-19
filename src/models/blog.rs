@@ -1,12 +1,10 @@
+use crate::schema::blogpost;
 use chrono::NaiveDate;
 use diesel::sql_types::{Nullable, Text};
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+use diesel::{ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 use failure::Error;
-use schema::blogpost;
 
-use DbConnection;
-
-#[derive(Queryable, Serialize)]
+#[derive(Debug, Queryable, Serialize)]
 pub struct BlogListItem {
     pub seo_name: String,
     pub title: String,
@@ -16,11 +14,10 @@ pub struct BlogListItem {
 
 impl BlogListItem {
     pub fn load_blog_posts(
-        db: &DbConnection,
+        conn: &PgConnection,
         limit: i64,
         offset: i64,
     ) -> Result<Vec<BlogListItem>, Error> {
-        let conn = db.conn.get()?;
         blogpost::table
             .filter(blogpost::dsl::published.eq(true))
             .limit(limit)
@@ -30,13 +27,14 @@ impl BlogListItem {
                 blogpost::dsl::title,
                 blogpost::dsl::date,
                 blogpost::dsl::summary,
-            )).order(blogpost::dsl::date.desc())
-            .get_results(&conn)
+            ))
+            .order(blogpost::dsl::date.desc())
+            .get_results(conn)
             .map_err(Into::into)
     }
 }
 
-#[derive(QueryableByName, Serialize)]
+#[derive(Debug, QueryableByName, Serialize)]
 pub struct BlogItem {
     #[sql_type = "Nullable<Text>"]
     pub previous_post_seo_name: Option<String>,
@@ -56,8 +54,7 @@ pub struct BlogItem {
 }
 
 impl BlogItem {
-    pub fn load(db: &DbConnection, name: &str) -> Result<Option<BlogItem>, Error> {
-        let conn = db.conn.get()?;
+    pub fn load(conn: &PgConnection, name: &str) -> Result<Option<BlogItem>, Error> {
         let result = ::diesel::sql_query(r#"
 SELECT
 	previous.seo_name AS previous_post_seo_name,
@@ -77,7 +74,7 @@ LEFT JOIN blogpost AS next ON next.ID = (
 WHERE blogpost.seo_name = $1
 "#)
         .bind::<Text, _>(name)
-        .get_result(&conn);
+        .get_result(conn);
 
         match result {
             Ok(v) => Ok(Some(v)),

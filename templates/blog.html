@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block content %}
+    {% for blog_item in blog_items %}
+        <h2>
+            <a href="/blog/{{blog_item.seo_name}}">{{blog_item.title}}</a>
+        </h2>
+        <small>{{blog_item.date}}</small>
+        <p>
+            {{blog_item.summary()|safe}}
+        </p>
+    {% endfor %}
+{% endblock content %}

@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block content %}
+    {% if blog.previous_post_seo_name.is_some() %}
+        <a href="/blog/{{blog.previous_post_seo_name.as_ref().unwrap()}}" class="float-right">{{blog.previous_post_title.as_ref().unwrap()}} -&gt;</a>
+    {% endif %}
+    {% if blog.next_post_seo_name.is_some() %}
+        <a href="/blog/{{blog.next_post_seo_name.as_ref().unwrap()}}">&lt- {{blog.next_post_title.as_ref().unwrap()}}</a>
+    {% else %}
+        <br />
+    {% endif %}
+    <h1>{{blog.title}}</h1>
+    {% if blog.tweet_id.is_some() %}
+        <p>Please leave your comments on <a href="https://twitter.com/victorkoenders/status/{{blog.tweet_id.as_ref().unwrap()}}" target="_blank">Twitter</a></p>
+    {% endif %}
+    {{ self.render_content()|safe }}
+    {% if blog.tweet_id.is_some() %}
+        <p>Please leave your comments on <a href="https://twitter.com/victorkoenders/status/{{blog.tweet_id.as_ref().unwrap()}}" target="_blank">Twitter</a></p>
+    {% endif %}
+{% endblock %}

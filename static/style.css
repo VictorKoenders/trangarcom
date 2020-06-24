@@ -28,19 +28,24 @@ nav ul::after {
     top: 5%;
 }
 
+a {
+    color: black;
+    text-decoration: underline;
+}
+
+a:hover {
+    color: #555;
+    text-decoration: none;
+}
+
 nav ul li a {
     white-space: nowrap;
-}
-
-a {
-    color: #333;
-    text-decoration: none;
     vertical-align: middle;
+    text-decoration: none;
 }
 
-.active a,
-a:hover {
-    color: black;
+nav ul li.active a,
+nav ul li a:hover {
     text-decoration: underline;
 }
 

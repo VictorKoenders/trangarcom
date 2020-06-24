@@ -1,7 +1,9 @@
 use crate::schema::blogpost;
 use chrono::NaiveDate;
-use diesel::sql_types::{Nullable, Text};
-use diesel::{ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{
+    sql_types::{Nullable, Text},
+    ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl,
+};
 use failure::Error;
 
 #[derive(Debug, Queryable, Serialize)]

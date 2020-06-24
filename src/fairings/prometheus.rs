@@ -2,8 +2,10 @@ use parking_lot::Mutex;
 use prometheus::{
     Encoder, Histogram, HistogramOpts, HistogramTimer, IntCounterVec, Opts, Registry, TextEncoder,
 };
-use rocket::fairing::{Fairing, Info, Kind};
-use rocket::{Data, Request, Response, State};
+use rocket::{
+    fairing::{Fairing, Info, Kind},
+    Data, Request, Response, State,
+};
 
 pub struct Prometheus {
     pub request_timer: Histogram,
@@ -67,7 +69,8 @@ impl Fairing for PrometheusFairing {
         let state = request.guard::<State<Prometheus>>().unwrap();
         let request_state: &PrometheusState = request.local_cache(|| unreachable!());
         state.response.with_label_values(&["all"]).inc();
-        state.response
+        state
+            .response
             .with_label_values(&[&response.status().code.to_string()])
             .inc();
         if let Some(timer) = request_state.timer.lock().take() {
@@ -79,4 +82,3 @@ impl Fairing for PrometheusFairing {
 struct PrometheusState {
     timer: Mutex<Option<HistogramTimer>>,
 }
-

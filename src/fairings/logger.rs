@@ -1,7 +1,9 @@
 use crate::rocket_utils::Database;
 use chrono::Utc;
-use rocket::fairing::{Fairing, Info, Kind};
-use rocket::{Data, Request, Response};
+use rocket::{
+    fairing::{Fairing, Info, Kind},
+    Data, Request, Response,
+};
 use std::fmt::Write;
 use time;
 use uuid::Uuid;

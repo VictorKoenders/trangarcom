@@ -5,7 +5,6 @@ use rocket::{
     Data, Request, Response,
 };
 use std::fmt::Write;
-use time;
 use uuid::Uuid;
 
 pub struct Logger;
@@ -53,7 +52,7 @@ impl Fairing for Logger {
 
     fn on_response(&self, request: &Request, response: &mut Response) {
         let database: Database = request.guard().expect("Could not get database instance");
-        let state: &LogState = request.local_cache(|| LogState::default());
+        let state: &LogState = request.local_cache(LogState::default);
         let status = response.status();
 
         trangarcom::models::Request::set_response(

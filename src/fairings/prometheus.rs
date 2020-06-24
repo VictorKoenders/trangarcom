@@ -27,7 +27,7 @@ impl Default for Prometheus {
         let registry = Registry::new();
         registry.register(Box::new(request_timer.clone())).unwrap();
         registry.register(Box::new(response.clone())).unwrap();
-        registry.register(Box::new(response_size.clone())).unwrap();
+        registry.register(Box::new(response_size)).unwrap();
 
         Prometheus {
             request_timer,

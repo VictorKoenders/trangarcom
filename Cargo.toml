@@ -13,7 +13,7 @@ rocket_contrib = { version = "0.4", features = ["diesel_postgres_pool", "serve"]
 diesel = { version = "1.4", features = ["postgres", "uuidv07", "chrono", "r2d2"] }
 r2d2 = "0.8" # dependent on diesel's version
 uuid = { version = "0.8", features = ["v4"] } # dependent on diesel's version
-time = "0.1" # dependent on diesel's version
+time = "0.2" # dependent on diesel's version
 dotenv = "0.15"
 chrono = { version = "0.4", features = ["serde"] }
 failure = "0.1"

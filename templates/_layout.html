@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{{ header.title }}</title>
+    <link href="static/style.css" rel="stylesheet" type="text/css">
+    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li class="{{ header.active("/") }}">
+                <a href="/">Home</a>
+            </li>
+            <!-- not live yet -->
+            <!--<li class="{{ header.active("/portfolio") }}">
+                    <a href="/portfolio">Portfolio</a>
+                </li>-->
+            <li>
+                <a class="nav-link" href="https://github.com/victorkoenders" target="_blank">
+                    <img src="/static/github.svg" class="github-icon" />/VictorKoenders
+                </a>
+            </li>
+            <li>
+                <a class="nav-link" href="https://github.com/Trangar" target="_blank">
+                    <img src="/static/github.svg" class="github-icon" />/Trangar
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,27 @@
+[package]
+name = "trangarcom"
+version = "0.1.0"
+authors = ["Trangar <victor.koenders@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+dotenv = "0.15"
+askama = "0.10"
+actix-web = "2.0"
+actix-files = "0.2"
+actix-rt = "1.1"
+futures = "0.3"
+tokio = { version = "0.2", features = ["macros", "rt-threaded"] }
+appinsights = { git = "https://github.com/victorkoenders/appinsights-rs", rev = "8f624dbf77c3106f9bf33f8a5df2cf8b83a006a6" }
+uuid = { version = "0.8", features = ["v4"] }
+
+[dependencies.prometheus]
+version = "0.9"
+features = ["process"]
+
+[dependencies.openssl]
+version = "0.10.30" # dependent on appinsights
+features = ["vendored"]
+
+[profile.release]
+lto = true

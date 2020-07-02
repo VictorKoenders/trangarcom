@@ -313,7 +313,7 @@ dependencies = [
 [[package]]
 name = "appinsights"
 version = "0.1.4"
-source = "git+https://github.com/victorkoenders/appinsights-rs?rev=8f624dbf77c3106f9bf33f8a5df2cf8b83a006a6#8f624dbf77c3106f9bf33f8a5df2cf8b83a006a6"
+source = "git+https://github.com/victorkoenders/appinsights-rs?rev=48cbd093e1e502ba29ccac9a50aff88ad481ad3e#48cbd093e1e502ba29ccac9a50aff88ad481ad3e"
 dependencies = [
  "chrono",
  "crossbeam-channel",

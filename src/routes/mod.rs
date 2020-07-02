@@ -6,7 +6,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(actix_files::Files::new("/static", "./static"))
         // routes
         .service(index)
-        .service(portfolio)
+        // .service(portfolio)
         .service(prometheus);
 }
 
@@ -59,7 +59,7 @@ struct Index<'a> {
     pub header: Header<'a>,
 }
 
-#[get("/portfolio")]
+/*#[get("/portfolio")]
 async fn portfolio() -> impl Responder {
     respond_html_template(Portfolio {
         header: Header {
@@ -73,7 +73,7 @@ async fn portfolio() -> impl Responder {
 #[template(path = "portfolio.html")]
 struct Portfolio<'a> {
     pub header: Header<'a>,
-}
+}*/
 
 #[get("/prometheus")]
 async fn prometheus(request: HttpRequest) -> impl Responder {

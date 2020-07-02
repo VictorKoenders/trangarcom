@@ -45,6 +45,8 @@ pub struct AppInsightsMiddleware<S> {
     client: Arc<TelemetryClient<InMemoryChannel>>,
 }
 
+type PinFut<Output> = Pin<Box<dyn Future<Output = Output>>>;
+
 impl<S, B> Service for AppInsightsMiddleware<S>
 where
     S::Future: 'static,
@@ -54,7 +56,7 @@ where
     type Request = ServiceRequest;
     type Response = ServiceResponse<B>;
     type Error = Error;
-    type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>>>>;
+    type Future = PinFut<Result<Self::Response, Self::Error>>;
 
     fn poll_ready(
         &mut self,

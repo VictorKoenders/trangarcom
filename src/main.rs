@@ -31,7 +31,7 @@ async fn main() -> Result<(), std::io::Error> {
         let prometheus = prometheus.clone();
         App::new()
             .data(context.clone())
-            .app_data(registry.clone())
+            .app_data(registry)
             .wrap(actix_web::middleware::Compress::default())
             .wrap(middleware::AppInsights::new(Arc::clone(&appinsights)))
             .wrap(prometheus)

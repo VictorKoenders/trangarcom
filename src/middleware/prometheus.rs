@@ -49,6 +49,8 @@ pub struct PrometheusMiddleware<S> {
     metrics: Arc<Metrics>,
 }
 
+type PinFut<Output> = Pin<Box<dyn Future<Output = Output>>>;
+
 impl<S, B> Service for PrometheusMiddleware<S>
 where
     S::Future: 'static,
@@ -58,7 +60,7 @@ where
     type Request = ServiceRequest;
     type Response = ServiceResponse<B>;
     type Error = Error;
-    type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>>>>;
+    type Future = PinFut<Result<Self::Response, Self::Error>>;
 
     fn poll_ready(
         &mut self,

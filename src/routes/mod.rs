@@ -6,6 +6,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(actix_files::Files::new("/static", "./static"))
         // routes
         .service(index)
+        .service(robots_txt)
         // .service(portfolio)
         .service(prometheus);
 }
@@ -57,6 +58,22 @@ async fn index() -> impl Responder {
 #[template(path = "index.html")]
 struct Index<'a> {
     pub header: Header<'a>,
+}
+
+#[get("/robots.txt")]
+async fn robots_txt() -> impl Responder {
+    r#"
+User-agent: *
+Allow: *
+Disallow: /admin/
+Disallow: /administrator/
+Disallow: /bb-admin/
+Disallow: /login/
+Disallow: /phpMyAdmin/
+Disallow: /wp-login.php
+Disallow: /wp-content/
+Disallow: /wp-admin/
+"#
 }
 
 /*#[get("/portfolio")]

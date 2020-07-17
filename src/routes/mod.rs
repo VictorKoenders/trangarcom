@@ -3,12 +3,15 @@ use std::sync::Arc;
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     // static files
-    cfg.service(actix_files::Files::new("/static", "./static"))
+    cfg
         // routes
         .service(index)
         .service(robots_txt)
         // .service(portfolio)
-        .service(prometheus);
+        .service(prometheus)
+        // static files
+        .service(actix_files::Files::new("/static", "./static"))
+        .service(actix_files::Files::new("/", "./static/favicon"));
 }
 
 fn respond_html_template<T: askama::Template>(t: T) -> impl Responder {

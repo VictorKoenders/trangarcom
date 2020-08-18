@@ -23,7 +23,8 @@ RUN apk add ca-certificates
 
 EXPOSE 8000
 
-COPY static .
+COPY static ./static
+COPY static/favicon ./static/favicon
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/trangarcom .
 
 CMD ["./trangarcom"]

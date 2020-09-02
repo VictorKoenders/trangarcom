@@ -16,7 +16,7 @@ appinsights = { git = "https://github.com/victorkoenders/appinsights-rs", rev = 
 uuid = { version = "0.8", features = ["v4"] }
 
 [dependencies.prometheus]
-version = "0.9"
+version = "0.10"
 features = ["process"]
 
 [dependencies.openssl]

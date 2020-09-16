@@ -67,10 +67,9 @@ where
     fn call(&mut self, req: Self::Request) -> Self::Future {
         let method = req.method().clone();
         let ip = req
-            .connection_info()
-            .remote()
-            .unwrap_or("unknown")
-            .to_string();
+            .peer_addr()
+            .map(|a| a.to_string())
+            .unwrap_or_else(|| String::from("unknown"));
         let uri = req.uri().clone();
         let start = Instant::now();
         let client = Arc::clone(&self.client);

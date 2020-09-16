@@ -14,6 +14,7 @@ futures = "0.3"
 tokio = { version = "0.2", features = ["macros", "rt-threaded"] }
 appinsights = { git = "https://github.com/victorkoenders/appinsights-rs", rev = "48cbd093e1e502ba29ccac9a50aff88ad481ad3e" }
 uuid = { version = "0.8", features = ["v4"] }
+pulldown-cmark = { version = "0.8", default-features = false, features = ["simd"] }
 
 [dependencies.prometheus]
 version = "0.10"

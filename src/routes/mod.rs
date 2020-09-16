@@ -1,3 +1,5 @@
+mod portfolio;
+
 use actix_web::{get, http::header::ContentType, web, HttpRequest, Responder};
 use std::sync::Arc;
 
@@ -7,6 +9,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         // routes
         .service(index)
         .service(robots_txt)
+        .service(portfolio::list)
         // .service(portfolio)
         .service(prometheus)
         // static files

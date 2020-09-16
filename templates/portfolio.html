@@ -1,0 +1,25 @@
+{% extends "_layout.html" %}
+{% block content %}
+
+{% for entry in entries %}
+<div class="portfolio-entry">
+    <div class="image">
+        <img src="{{entry.image_url}}" alt="{{entry.title}}" />
+    </div>
+    <div class="body">
+        {% if entry.title_link.is_some() %}
+        <h3><a href="{{entry.title_link.unwrap()}}">{{entry.title}}</a></h3>
+        {% else %}
+        <h3>{{entry.title}}</h3>
+        {% endif %}
+        <p>
+            {{entry.body|markdown|safe}}
+        </p>
+    </div>
+</div>
+
+{% endfor %}
+<p>
+    Your project here? Contact us at <i><u>project name</u></i>@trangar.com
+</p>
+{% endblock content %}

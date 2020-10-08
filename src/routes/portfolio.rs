@@ -31,7 +31,7 @@ async fn list() -> impl Responder {
 Ridder Growing Solutions provides solutions to all challenges in the agricultural industry.
 This includes Process Automation, Water Treatment and Management systems.
 
-Trangar helps develop several products, including [Ridder Productive](https://ridder.com/en/page/products-system/ridder-productive-control-over-quality-performance-and-productivity), [Ridder iScan](https://ridder.com/en/page/products-system/ridder-iscan-accurate-labor-and-productivity-tracking-in-greenhouses) and [Ridder HortiMaX-Go!](https://ridder.com/en/pageid/products-hortimax-go).
+Trangar helps develop several products, including [Ridder Productive](https://ridder.com/ridder-productive), [Ridder iScan](https://ridder.com/ridder-productive-scanning-system) and [Ridder HortiMaX-Go!](https://ridder.com/ridder-hortimax-go).
 "#,
             },
             Portfolio {

@@ -75,6 +75,38 @@ small {
     vertical-align: top;
 }
 
+.portfolio-entry {
+    display: flex;
+}
+
+.portfolio-entry > .image {
+    flex: 0 0 10em;
+    display: flex;
+}
+
+.portfolio-entry:nth-of-type(even) > .image {
+    order: 1;
+}
+
+.portfolio-entry > .image > img {
+    width: 100%;
+    align-self: center;
+}
+
+.portfolio-entry > .body {
+    margin: 1em;
+}
+
+.portfolio-entry > .body img {
+    height: 16pt;
+    position: relative;
+    top: 5px;
+}
+
+.portfolio-entry:last-of-type {
+    margin-bottom: 1em;
+}
+
 /* responsive block */
 @media (max-width: 960px) {
     body {

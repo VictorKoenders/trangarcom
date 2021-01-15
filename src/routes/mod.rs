@@ -12,6 +12,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         .service(portfolio::list)
         // .service(portfolio)
         .service(prometheus)
+        .service(resume)
         // static files
         .service(actix_files::Files::new("/static", "./static"))
         .service(actix_files::Files::new("/", "./static/favicon"));
@@ -64,6 +65,16 @@ async fn index() -> impl Responder {
 #[template(path = "index.html")]
 struct Index<'a> {
     pub header: Header<'a>,
+}
+
+#[get("/resume")]
+async fn resume() -> impl Responder {
+    respond_html_template(Resume { })
+}
+
+#[derive(askama::Template)]
+#[template(path = "resume.html")]
+struct Resume {
 }
 
 #[get("/robots.txt")]

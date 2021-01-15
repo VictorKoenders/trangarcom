@@ -137,6 +137,12 @@ table {
     }
 }
 @media print {
+    .resume_container {
+        display: flex;
+    }
+    .left {
+        width: 50%;
+    }
     .container {
         position:absolute;
         top:0px;

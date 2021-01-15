@@ -107,10 +107,36 @@ table {
 .resume_container .left a:hover {
     color: #999;
 }
-@media print {
-    .navbar {
+
+.vertical-spacing {
+    display: block;
+    height: 3em;
+}
+
+@media (max-width: 800px) {
+    .container {
+        padding: 0;
+    }
+    .vertical-spacing {
         display: none;
     }
+    .resume_container {
+        display: inherit;
+    }
+    .left {
+        width: 100%;
+    }
+    .right {
+        width: 100%;
+        padding-right: 1em;
+    }
+
+    .vertical-cell, .vertical-cell .start {
+        width: 100px;
+        font-size: 75%;
+    }
+}
+@media print {
     .container {
         position:absolute;
         top:0px;

@@ -69,13 +69,12 @@ struct Index<'a> {
 
 #[get("/resume")]
 async fn resume() -> impl Responder {
-    respond_html_template(Resume { })
+    respond_html_template(Resume {})
 }
 
 #[derive(askama::Template)]
 #[template(path = "resume.html")]
-struct Resume {
-}
+struct Resume {}
 
 #[get("/robots.txt")]
 async fn robots_txt() -> impl Responder {

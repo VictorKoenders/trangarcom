@@ -20,7 +20,7 @@ version = "0.12"
 features = ["process"]
 
 [dependencies.openssl]
-version = "0.10.34" # dependent on appinsights
+version = "0.10.35" # dependent on appinsights
 features = ["vendored"]
 
 [profile.release]

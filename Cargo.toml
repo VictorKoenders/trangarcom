@@ -9,7 +9,7 @@ dotenv = "0.15"
 askama = "0.10"
 actix-web = "3.3"
 actix-files = "0.5"
-actix-rt = "1.1"
+actix-rt = "2.3"
 futures = "0.3"
 tokio = { version = "0.2", features = ["macros", "rt-threaded"] }
 uuid = { version = "0.8", features = ["v4"] }

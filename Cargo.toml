@@ -13,7 +13,7 @@ actix-rt = "1.1"
 futures = "0.3"
 tokio = { version = "0.2", features = ["macros", "rt-threaded"] }
 uuid = { version = "0.8", features = ["v4"] }
-pulldown-cmark = { version = "0.8", default-features = false, features = ["simd"] }
+pulldown-cmark = { version = "0.9", default-features = false, features = ["simd"] }
 
 [dependencies.prometheus]
 version = "0.12"

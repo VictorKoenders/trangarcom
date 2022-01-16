@@ -1,5 +1,4 @@
 use super::Header;
-use actix_web::{get, Responder};
 
 #[derive(askama::Template)]
 #[template(path = "portfolio.html")]
@@ -15,8 +14,7 @@ pub struct Portfolio {
     body: &'static str,
 }
 
-#[get("/portfolio")]
-async fn list() -> impl Responder {
+pub async fn list(_: super::Request) -> tide::Result {
     super::respond_html_template(PortfolioList {
         header: Header {
             title: "Trangar.com",

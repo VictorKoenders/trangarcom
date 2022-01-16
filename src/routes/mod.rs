@@ -1,39 +1,29 @@
 mod portfolio;
 
-use actix_web::{get, http::header::ContentType, web, HttpRequest, Responder};
-use std::sync::Arc;
+type Request = tide::Request<crate::Context>;
 
-pub fn configure(cfg: &mut web::ServiceConfig) {
-    // static files
-    cfg
-        // routes
-        .service(index)
-        .service(robots_txt)
-        .service(portfolio::list)
-        // .service(portfolio)
-        .service(prometheus)
-        .service(resume)
-        // static files
-        .service(actix_files::Files::new("/static", "./static"))
-        .service(actix_files::Files::new("/", "./static/favicon"));
+pub fn configure(app: &mut tide::Server<crate::Context>) {
+    app.at("/").get(index);
+    app.at("/resume").get(resume);
+    app.at("/robots.txt").get(robots_txt);
+    app.at("/prometheus").get(prometheus);
+    app.at("/portfolio").get(portfolio::list);
+    app.at("/static").serve_dir("static/").expect("Could not serve ./static/");
+    app.at("/").serve_dir("static/favicon").expect("Could not serve ./static/favicon/");
 }
 
-fn respond_html_template<T: askama::Template>(t: T) -> impl Responder {
-    match t.render() {
-        Ok(body) => {
-            let mut builder = web::HttpResponse::Ok();
-            builder.set(ContentType::html());
-            builder.body(body)
-        }
-        Err(e) => {
-            let mut builder = web::HttpResponse::InternalServerError();
-            builder.set(ContentType::html());
-            builder.body(format!(
-                "<html><body><h1>Internal server error</h1><pre>{:?}</pre></body></html>",
-                e
-            ))
-        }
-    }
+
+fn respond_html_template<T: askama::Template>(t: T) -> tide::Result {
+    let body = tide::Body::from_string(t.render().unwrap_or_else(|e| {
+        format!(
+            "<html><body><h1>Internal server error</h1><pre>{:?}</pre></body></html>",
+            e
+        )
+    }));
+    Ok(tide::Response::builder(200)
+        .content_type(tide::http::mime::HTML)
+        .body(body)
+        .build())
 }
 
 pub struct Header<'a> {
@@ -51,8 +41,7 @@ impl Header<'_> {
     }
 }
 
-#[get("/")]
-async fn index() -> impl Responder {
+async fn index(_: Request) -> tide::Result {
     respond_html_template(Index {
         header: Header {
             title: "Trangar.com",
@@ -67,8 +56,7 @@ struct Index<'a> {
     pub header: Header<'a>,
 }
 
-#[get("/resume")]
-async fn resume() -> impl Responder {
+async fn resume(_: Request) -> tide::Result {
     respond_html_template(Resume {})
 }
 
@@ -76,9 +64,8 @@ async fn resume() -> impl Responder {
 #[template(path = "resume.html")]
 struct Resume {}
 
-#[get("/robots.txt")]
-async fn robots_txt() -> impl Responder {
-    r#"
+async fn robots_txt(_: Request) -> tide::Result {
+    Ok(r#"
 User-agent: *
 Allow: *
 Disallow: /admin/
@@ -89,33 +76,16 @@ Disallow: /phpMyAdmin/
 Disallow: /wp-login.php
 Disallow: /wp-content/
 Disallow: /wp-admin/
-"#
+"#.into())
 }
 
-/*#[get("/portfolio")]
-async fn portfolio() -> impl Responder {
-    respond_html_template(Portfolio {
-        header: Header {
-            title: "Trangar.com",
-            url: "/portfolio",
-        },
-    })
-}
-
-#[derive(askama::Template)]
-#[template(path = "portfolio.html")]
-struct Portfolio<'a> {
-    pub header: Header<'a>,
-}*/
-
-#[get("/prometheus")]
-async fn prometheus(request: HttpRequest) -> impl Responder {
-    use ::prometheus::{Encoder, Registry, TextEncoder};
+async fn prometheus(req: Request) -> tide::Result {
+    use ::prometheus::{Encoder, TextEncoder};
 
     let mut buffer = Vec::new();
-    let metric_families = request.app_data::<Arc<Registry>>().unwrap().gather();
+    let metric_families = req.state().prometheus.gather();
     TextEncoder::new()
         .encode(&metric_families, &mut buffer)
         .unwrap();
-    String::from_utf8(buffer).unwrap()
+    Ok(String::from_utf8(buffer).unwrap().into())
 }

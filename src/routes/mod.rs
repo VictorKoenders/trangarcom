@@ -8,10 +8,13 @@ pub fn configure(app: &mut tide::Server<crate::Context>) {
     app.at("/robots.txt").get(robots_txt);
     app.at("/prometheus").get(prometheus);
     app.at("/portfolio").get(portfolio::list);
-    app.at("/static").serve_dir("static/").expect("Could not serve ./static/");
-    app.at("/").serve_dir("static/favicon").expect("Could not serve ./static/favicon/");
+    app.at("/static")
+        .serve_dir("static/")
+        .expect("Could not serve ./static/");
+    app.at("/")
+        .serve_dir("static/favicon")
+        .expect("Could not serve ./static/favicon/");
 }
-
 
 fn respond_html_template<T: askama::Template>(t: T) -> tide::Result {
     let body = tide::Body::from_string(t.render().unwrap_or_else(|e| {
@@ -76,7 +79,8 @@ Disallow: /phpMyAdmin/
 Disallow: /wp-login.php
 Disallow: /wp-content/
 Disallow: /wp-admin/
-"#.into())
+"#
+    .into())
 }
 
 async fn prometheus(req: Request) -> tide::Result {

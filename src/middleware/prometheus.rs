@@ -81,7 +81,7 @@ impl Metrics {
 
     pub fn record_method(&self, method: Method) {
         self.methods.with_label_values(&["all"]).inc();
-        self.methods.with_label_values(&[&method.to_string()]).inc();
+        self.methods.with_label_values(&[method.as_ref()]).inc();
     }
 
     pub fn start_response_timer(&self) -> HistogramTimer {

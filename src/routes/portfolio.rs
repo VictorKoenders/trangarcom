@@ -83,8 +83,8 @@ Another common use case is to collect information or follow accounts on from one
 }
 
 mod filters {
-    pub fn markdown(s: &str) -> Result<String, core::fmt::Error> {
-        let parser = pulldown_cmark::Parser::new(s);
+    pub fn pulldown_cmark(s: &str) -> Result<String, core::fmt::Error> {
+        let parser = ::pulldown_cmark::Parser::new(s);
         let mut output = String::new();
         pulldown_cmark::html::push_html(&mut output, parser);
         Ok(output)

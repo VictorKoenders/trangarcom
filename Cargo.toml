@@ -5,14 +5,15 @@ authors = ["Trangar <victor.koenders@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-askama = "0.11"
-async-std = { version = "1.12", features = ["attributes"] }
-tide = "0.16.0"
+askama = { version = "0.11", default-features = false }
+async-std = { version = "1.12", features = ["attributes"], default-features = false }
+tide = { version = "0.16", features = ["h1-server"], default-features = false }
 pulldown-cmark = { version = "0.9", default-features = false, features = ["simd"] }
-clap = { version = "3.1.18", features = ["derive"] }
+clap = { version = "3.1", features = ["derive", "std"], default-features = false }
 
 [dependencies.prometheus]
 version = "0.13"
+default-features = false
 features = ["process"]
 
 [profile.release]

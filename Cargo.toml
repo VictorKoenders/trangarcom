@@ -5,7 +5,7 @@ authors = ["Trangar <victor.koenders@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-askama = { version = "0.11", default-features = false }
+askama = { version = "0.12", default-features = false }
 async-std = { version = "1.12", features = ["attributes"], default-features = false }
 tide = { version = "0.16", features = ["h1-server"], default-features = false }
 pulldown-cmark = { version = "0.9", default-features = false, features = ["simd"] }

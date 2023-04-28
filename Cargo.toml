@@ -9,7 +9,7 @@ askama = { version = "0.12", default-features = false }
 async-std = { version = "1.12", features = ["attributes"], default-features = false }
 tide = { version = "0.16", features = ["h1-server"], default-features = false }
 pulldown-cmark = { version = "0.9", default-features = false, features = ["simd"] }
-clap = { version = "4.1", features = ["derive", "std"], default-features = false }
+clap = { version = "4.2", features = ["derive", "std"], default-features = false }
 
 [dependencies.prometheus]
 version = "0.13"
